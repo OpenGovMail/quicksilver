@@ -4,8 +4,8 @@ import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 interface MessageContentProps {
-	content: string;
-	contentHtml?: string;
+  content: string;
+  contentHtml?: string;
 }
 
 // Tags/attributes allowed in rendered email HTML. Anything not on this list
@@ -13,46 +13,46 @@ interface MessageContentProps {
 // Typed via Parameters<> so we don't depend on DOMPurify's namespace exports,
 // which moved between v2 and v3.
 const PURIFY_CONFIG: Parameters<typeof DOMPurify.sanitize>[1] = {
-	USE_PROFILES: { html: true },
-	ALLOWED_ATTR: [
-		"href",
-		"src",
-		"alt",
-		"title",
-		"name",
-		"id",
-		"class",
-		"style",
-		"width",
-		"height",
-		"border",
-		"cellpadding",
-		"cellspacing",
-		"align",
-		"valign",
-		"bgcolor",
-		"color",
-		"colspan",
-		"rowspan",
-		"target",
-		"rel",
-	],
-	FORBID_TAGS: [
-		"script",
-		"iframe",
-		"object",
-		"embed",
-		"form",
-		"input",
-		"button",
-		"meta",
-		"base",
-	],
-	FORBID_ATTR: ["srcset", "ping", "formaction"],
-	ALLOW_DATA_ATTR: false,
-	// Block javascript:/vbscript:/data: URLs in href/src.
-	ALLOWED_URI_REGEXP:
-		/^(?:(?:https?|mailto|tel|cid):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
+  USE_PROFILES: { html: true },
+  ALLOWED_ATTR: [
+    "href",
+    "src",
+    "alt",
+    "title",
+    "name",
+    "id",
+    "class",
+    "style",
+    "width",
+    "height",
+    "border",
+    "cellpadding",
+    "cellspacing",
+    "align",
+    "valign",
+    "bgcolor",
+    "color",
+    "colspan",
+    "rowspan",
+    "target",
+    "rel",
+  ],
+  FORBID_TAGS: [
+    "script",
+    "iframe",
+    "object",
+    "embed",
+    "form",
+    "input",
+    "button",
+    "meta",
+    "base",
+  ],
+  FORBID_ATTR: ["srcset", "ping", "formaction"],
+  ALLOW_DATA_ATTR: false,
+  // Block javascript:/vbscript:/data: URLs in href/src.
+  ALLOWED_URI_REGEXP:
+    /^(?:(?:https?|mailto|tel|cid):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
 };
 
 // HTML wrapper for the iframe srcdoc. Inline CSS keeps email layouts
@@ -101,29 +101,29 @@ const IFRAME_HTML_HEAD = `
 const IFRAME_HTML_FOOT = `</body></html>`;
 
 const MessageContent: React.FC<MessageContentProps> = ({
-	content,
-	contentHtml,
+  content,
+  contentHtml,
 }) => {
-	const cleanHTML = useMemo(() => {
-		if (!contentHtml) return null;
-		// DOMPurify v3 types sanitize() as string | TrustedHTML; we never enable
-		// RETURN_TRUSTED_TYPE so the runtime result is always a string. Cast via
-		// `unknown` rather than `as string` to satisfy strict TS.
-		return DOMPurify.sanitize(contentHtml, PURIFY_CONFIG) as unknown as string;
-	}, [contentHtml]);
+  const cleanHTML = useMemo(() => {
+    if (!contentHtml) return null;
+    // DOMPurify v3 types sanitize() as string | TrustedHTML; we never enable
+    // RETURN_TRUSTED_TYPE so the runtime result is always a string. Cast via
+    // `unknown` rather than `as string` to satisfy strict TS.
+    return DOMPurify.sanitize(contentHtml, PURIFY_CONFIG) as unknown as string;
+  }, [contentHtml]);
 
-	if (cleanHTML) {
-		return <IsolatedHTML html={cleanHTML} />;
-	}
+  if (cleanHTML) {
+    return <IsolatedHTML html={cleanHTML} />;
+  }
 
-	return (
-		<Typography
-			variant="body2"
-			sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
-		>
-			{content}
-		</Typography>
-	);
+  return (
+    <Typography
+      variant="body2"
+      sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+    >
+      {content}
+    </Typography>
+  );
 };
 
 // Remembers the last measured height for each srcDoc across remounts. On a
@@ -137,109 +137,109 @@ const heightCache = new Map<string, number>();
 // submission — defense in depth on top of DOMPurify. The iframe auto-resizes
 // to its content height so it visually behaves like inline content.
 const IsolatedHTML: React.FC<{ html: string }> = ({ html }) => {
-	const ref = useRef<HTMLIFrameElement | null>(null);
+  const ref = useRef<HTMLIFrameElement | null>(null);
 
-	const srcDoc = useMemo(
-		() => `${IFRAME_HTML_HEAD}${html}${IFRAME_HTML_FOOT}`,
-		[html],
-	);
+  const srcDoc = useMemo(
+    () => `${IFRAME_HTML_HEAD}${html}${IFRAME_HTML_FOOT}`,
+    [html],
+  );
 
-	// Seed from the cache so a known email renders at its real height instantly;
-	// 40 is a small neutral floor used only when nothing has been measured yet.
-	const [height, setHeight] = useState<number>(
-		() => heightCache.get(srcDoc) ?? 40,
-	);
-	// resize() runs in listeners/timeouts that close over the initial render, so
-	// read the latest height from a ref to avoid a stale-closure comparison.
-	const heightRef = useRef(height);
-	heightRef.current = height;
+  // Seed from the cache so a known email renders at its real height instantly;
+  // 40 is a small neutral floor used only when nothing has been measured yet.
+  const [height, setHeight] = useState<number>(
+    () => heightCache.get(srcDoc) ?? 40,
+  );
+  // resize() runs in listeners/timeouts that close over the initial render, so
+  // read the latest height from a ref to avoid a stale-closure comparison.
+  const heightRef = useRef(height);
+  heightRef.current = height;
 
-	useEffect(() => {
-		const iframe = ref.current;
-		if (!iframe) return;
-		const resize = () => {
-			const doc = iframe.contentDocument;
-			if (!doc) return;
-			const h = Math.max(
-				doc.documentElement.scrollHeight,
-				doc.body?.scrollHeight || 0,
-			);
-			// Only commit meaningful changes so the ResizeObserver + poll safety-net
-			// don't thrash on sub-pixel jitter; cache the result for future remounts.
-			if (h > 0 && Math.abs(h - heightRef.current) > 2) {
-				heightCache.set(srcDoc, h);
-				setHeight(h);
-			}
-		};
+  useEffect(() => {
+    const iframe = ref.current;
+    if (!iframe) return;
+    const resize = () => {
+      const doc = iframe.contentDocument;
+      if (!doc) return;
+      const h = Math.max(
+        doc.documentElement.scrollHeight,
+        doc.body?.scrollHeight || 0,
+      );
+      // Only commit meaningful changes so the ResizeObserver + poll safety-net
+      // don't thrash on sub-pixel jitter; cache the result for future remounts.
+      if (h > 0 && Math.abs(h - heightRef.current) > 2) {
+        heightCache.set(srcDoc, h);
+        setHeight(h);
+      }
+    };
 
-		// If the iframe finished loading before this effect ran (common with
-		// srcDoc, which is synchronous), fire once immediately. Otherwise the
-		// listener below will catch the load.
-		if (iframe.contentDocument?.readyState === "complete") {
-			resize();
-		}
-		iframe.addEventListener("load", resize);
+    // If the iframe finished loading before this effect ran (common with
+    // srcDoc, which is synchronous), fire once immediately. Otherwise the
+    // listener below will catch the load.
+    if (iframe.contentDocument?.readyState === "complete") {
+      resize();
+    }
+    iframe.addEventListener("load", resize);
 
-		// Email HTML often references remote images that change height after
-		// first paint. ResizeObserver catches those; the polls are a safety net
-		// for browsers/edge cases where the observer doesn't fire.
-		let observer: ResizeObserver | undefined;
-		const tryAttachObserver = () => {
-			const doc = iframe.contentDocument;
-			if (doc?.body && typeof ResizeObserver !== "undefined" && !observer) {
-				observer = new ResizeObserver(resize);
-				observer.observe(doc.body);
-			}
-		};
-		tryAttachObserver();
-		const timeouts = [100, 400, 1500, 4000].map((ms) =>
-			window.setTimeout(() => {
-				tryAttachObserver();
-				resize();
-			}, ms),
-		);
+    // Email HTML often references remote images that change height after
+    // first paint. ResizeObserver catches those; the polls are a safety net
+    // for browsers/edge cases where the observer doesn't fire.
+    let observer: ResizeObserver | undefined;
+    const tryAttachObserver = () => {
+      const doc = iframe.contentDocument;
+      if (doc?.body && typeof ResizeObserver !== "undefined" && !observer) {
+        observer = new ResizeObserver(resize);
+        observer.observe(doc.body);
+      }
+    };
+    tryAttachObserver();
+    const timeouts = [100, 400, 1500, 4000].map((ms) =>
+      window.setTimeout(() => {
+        tryAttachObserver();
+        resize();
+      }, ms),
+    );
 
-		return () => {
-			iframe.removeEventListener("load", resize);
-			observer?.disconnect();
-			timeouts.forEach((t) => window.clearTimeout(t));
-		};
-	}, [srcDoc]);
+    return () => {
+      iframe.removeEventListener("load", resize);
+      observer?.disconnect();
+      timeouts.forEach((t) => window.clearTimeout(t));
+    };
+  }, [srcDoc]);
 
-	return (
-		<Box
-			sx={{
-				width: "100%",
-				// Slight padding so iframe content doesn't kiss the bubble edge.
-				my: 0.5,
-			}}
-		>
-			<iframe
-				ref={ref}
-				title="message body"
-				srcDoc={srcDoc}
-				// Sandbox notes:
-				//   - NO allow-scripts: this is the load-bearing JS-isolation defense.
-				//     Never add it; DOMPurify is layer-1, the sandbox is layer-2.
-				//   - allow-same-origin is required so the parent can read the iframe's
-				//     DOM to auto-size it. Pairing same-origin WITHOUT scripts is safe:
-				//     the iframe has no way to execute code or touch parent state.
-				//   - allow-popups + allow-popups-to-escape-sandbox lets links open in
-				//     a normal new tab (target="_blank" via our injected <base>).
-				sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-				referrerPolicy="no-referrer"
-				style={{
-					width: "100%",
-					height: `${height}px`,
-					// Ease any late resize (e.g. remote images) instead of snapping.
-					transition: "height 120ms ease-out",
-					border: 0,
-					display: "block",
-					backgroundColor: "transparent",
-				}}
-			/>
-		</Box>
-	);
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        // Slight padding so iframe content doesn't kiss the bubble edge.
+        my: 0.5,
+      }}
+    >
+      <iframe
+        ref={ref}
+        title="message body"
+        srcDoc={srcDoc}
+        // Sandbox notes:
+        //   - NO allow-scripts: this is the load-bearing JS-isolation defense.
+        //     Never add it; DOMPurify is layer-1, the sandbox is layer-2.
+        //   - allow-same-origin is required so the parent can read the iframe's
+        //     DOM to auto-size it. Pairing same-origin WITHOUT scripts is safe:
+        //     the iframe has no way to execute code or touch parent state.
+        //   - allow-popups + allow-popups-to-escape-sandbox lets links open in
+        //     a normal new tab (target="_blank" via our injected <base>).
+        sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+        referrerPolicy="no-referrer"
+        style={{
+          width: "100%",
+          height: `${height}px`,
+          // Ease any late resize (e.g. remote images) instead of snapping.
+          transition: "height 120ms ease-out",
+          border: 0,
+          display: "block",
+          backgroundColor: "transparent",
+        }}
+      />
+    </Box>
+  );
 };
 
 export default MessageContent;

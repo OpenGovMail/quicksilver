@@ -11,22 +11,22 @@ import React from "react";
 import { getTemplate, type TemplateValues } from "./templates";
 
 export interface RenderedEmail {
-	html: string;
-	text: string;
+  html: string;
+  text: string;
 }
 
 export async function renderTemplate(
-	templateId: string,
-	values: TemplateValues,
+  templateId: string,
+  values: TemplateValues,
 ): Promise<RenderedEmail> {
-	const template = getTemplate(templateId);
-	if (!template) {
-		throw new Error(`Unknown email template: ${templateId}`);
-	}
-	const element = React.createElement(template.Component, { values });
-	const [html, text] = await Promise.all([
-		render(element, { pretty: false }),
-		render(element, { plainText: true }),
-	]);
-	return { html, text };
+  const template = getTemplate(templateId);
+  if (!template) {
+    throw new Error(`Unknown email template: ${templateId}`);
+  }
+  const element = React.createElement(template.Component, { values });
+  const [html, text] = await Promise.all([
+    render(element, { pretty: false }),
+    render(element, { plainText: true }),
+  ]);
+  return { html, text };
 }

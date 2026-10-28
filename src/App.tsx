@@ -1,8 +1,8 @@
 import {
-	Box,
-	CircularProgress,
-	CssBaseline,
-	ThemeProvider,
+  Box,
+  CircularProgress,
+  CssBaseline,
+  ThemeProvider,
 } from "@mui/material";
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
@@ -27,121 +27,121 @@ import ThreadPage from "./view/pages/ThreadPage";
 const ComposePage = lazy(() => import("./view/pages/ComposePage"));
 
 const RouteFallback = () => (
-	<Box
-		sx={{
-			display: "flex",
-			justifyContent: "center",
-			alignItems: "center",
-			minHeight: "60vh",
-		}}
-	>
-		<CircularProgress />
-	</Box>
+  <Box
+    sx={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      minHeight: "60vh",
+    }}
+  >
+    <CircularProgress />
+  </Box>
 );
 
 function App() {
-	return (
-		<ThemeProvider theme={theme}>
-			<CssBaseline />
-			<AuthProvider>
-				<AccountProvider>
-					<DataProvider>
-						<ComposeProvider>
-							<Routes>
-								{/* Public Routes */}
-								<Route path="/login" element={<LoginPage />} />
-								<Route path="/register" element={<RegisterPage />} />
-								<Route
-									path="/forgot-password"
-									element={<ForgotPasswordPage />}
-								/>
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <AuthProvider>
+        <AccountProvider>
+          <DataProvider>
+            <ComposeProvider>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route
+                  path="/forgot-password"
+                  element={<ForgotPasswordPage />}
+                />
 
-								{/* Protected Routes */}
-								<Route
-									path="/"
-									element={
-										<ProtectedRoute>
-											<MailPage />
-										</ProtectedRoute>
-									}
-								>
-									<Route
-										path="thread/:threadId"
-										element={
-											<ProtectedRoute>
-												<ThreadPage />
-											</ProtectedRoute>
-										}
-									/>
-								</Route>
-								<Route
-									path="/inbox"
-									element={
-										<ProtectedRoute>
-											<Navigate to="/" replace />
-										</ProtectedRoute>
-									}
-								/>
-								<Route
-									path="/sent"
-									element={
-										<ProtectedRoute>
-											<Navigate to="/" replace />
-										</ProtectedRoute>
-									}
-								/>
-								<Route
-									path="/drafts"
-									element={
-										<ProtectedRoute>
-											<Navigate to="/" replace />
-										</ProtectedRoute>
-									}
-								/>
-								<Route
-									path="/trash"
-									element={
-										<ProtectedRoute>
-											<Navigate to="/" replace />
-										</ProtectedRoute>
-									}
-								/>
-								<Route
-									path="/conversations"
-									element={
-										<ProtectedRoute>
-											<Navigate to="/" replace />
-										</ProtectedRoute>
-									}
-								/>
-								<Route
-									path="/compose"
-									element={
-										<ProtectedRoute>
-											<Suspense fallback={<RouteFallback />}>
-												<ComposePage />
-											</Suspense>
-										</ProtectedRoute>
-									}
-								/>
-								<Route
-									path="/profile"
-									element={
-										<ProtectedRoute>
-											<ProfilePage />
-										</ProtectedRoute>
-									}
-								/>
+                {/* Protected Routes */}
+                <Route
+                  path="/"
+                  element={
+                    <ProtectedRoute>
+                      <MailPage />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route
+                    path="thread/:threadId"
+                    element={
+                      <ProtectedRoute>
+                        <ThreadPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                </Route>
+                <Route
+                  path="/inbox"
+                  element={
+                    <ProtectedRoute>
+                      <Navigate to="/" replace />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/sent"
+                  element={
+                    <ProtectedRoute>
+                      <Navigate to="/" replace />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/drafts"
+                  element={
+                    <ProtectedRoute>
+                      <Navigate to="/" replace />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/trash"
+                  element={
+                    <ProtectedRoute>
+                      <Navigate to="/" replace />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/conversations"
+                  element={
+                    <ProtectedRoute>
+                      <Navigate to="/" replace />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/compose"
+                  element={
+                    <ProtectedRoute>
+                      <Suspense fallback={<RouteFallback />}>
+                        <ComposePage />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <ProfilePage />
+                    </ProtectedRoute>
+                  }
+                />
 
-								{/* 404 Not Found - catch all */}
-								<Route path="*" element={<NotFoundPage />} />
-							</Routes>
-						</ComposeProvider>
-					</DataProvider>
-				</AccountProvider>
-			</AuthProvider>
-		</ThemeProvider>
-	);
+                {/* 404 Not Found - catch all */}
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </ComposeProvider>
+          </DataProvider>
+        </AccountProvider>
+      </AuthProvider>
+    </ThemeProvider>
+  );
 }
 
 export default App;

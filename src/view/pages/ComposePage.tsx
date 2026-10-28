@@ -4,45 +4,45 @@ import AppLayout from "../moles/AppLayout";
 import ComposePanel from "../moles/ComposePanel";
 
 const parseRecipients = (toParam: string | null): Address[] => {
-	if (!toParam) return [];
-	return toParam
-		.split(",")
-		.map((email) => email.trim())
-		.filter(Boolean)
-		.map((email) => ({ email }));
+  if (!toParam) return [];
+  return toParam
+    .split(",")
+    .map((email) => email.trim())
+    .filter(Boolean)
+    .map((email) => ({ email }));
 };
 
 function ComposePage() {
-	const navigate = useNavigate();
-	const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-	const initial = {
-		to: parseRecipients(searchParams.get("to")),
-		subject: searchParams.get("subject") || "",
-		body: searchParams.get("body") || "",
-	};
+  const initial = {
+    to: parseRecipients(searchParams.get("to")),
+    subject: searchParams.get("subject") || "",
+    body: searchParams.get("body") || "",
+  };
 
-	const goBack = () => {
-		// navigate(-1) silently no-ops when compose was opened directly or after a
-		// reload (no prior history entry), so fall back to the mail pane.
-		if (window.history.length > 1) {
-			navigate(-1);
-		} else {
-			navigate("/");
-		}
-	};
+  const goBack = () => {
+    // navigate(-1) silently no-ops when compose was opened directly or after a
+    // reload (no prior history entry), so fall back to the mail pane.
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/");
+    }
+  };
 
-	return (
-		<AppLayout title="Compose">
-			<ComposePanel
-				initial={initial}
-				onClose={goBack}
-				onSent={() => navigate("/")}
-				onSavedDraft={() => navigate("/")}
-				/* onSent receives a SentSummary; the page just navigates. */
-			/>
-		</AppLayout>
-	);
+  return (
+    <AppLayout title="Compose">
+      <ComposePanel
+        initial={initial}
+        onClose={goBack}
+        onSent={() => navigate("/")}
+        onSavedDraft={() => navigate("/")}
+        /* onSent receives a SentSummary; the page just navigates. */
+      />
+    </AppLayout>
+  );
 }
 
 export default ComposePage;

@@ -13,38 +13,38 @@
 // this worker only touches the plain-text fallback.
 
 export interface ParseRequest {
-	id: number;
-	bodyText?: string;
-	bodyHtml?: string;
+  id: number;
+  bodyText?: string;
+  bodyHtml?: string;
 }
 
 export interface ParseResponse {
-	id: number;
-	content: string;
+  id: number;
+  content: string;
 }
 
 // Lightweight HTML→text stripper for the plain-text fallback. Not a sanitiser —
 // it feeds screen readers, search, and the no-HTML fallback path only. Kept in
 // sync with the identical fallback in ../core/messageParser.ts.
 function stripHTML(s: string): string {
-	return s
-		.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-		.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-		.replace(/<[^>]+>/g, " ")
-		.replace(/\s+/g, " ")
-		.trim();
+  return s
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 // The DOM lib types `self` as a Window (which lacks the dedicated-worker
 // postMessage signature), so narrow it to just what we use.
 interface WorkerCtx {
-	onmessage: ((e: MessageEvent<ParseRequest>) => void) | null;
-	postMessage(message: ParseResponse): void;
+  onmessage: ((e: MessageEvent<ParseRequest>) => void) | null;
+  postMessage(message: ParseResponse): void;
 }
 const ctx = self as unknown as WorkerCtx;
 
 ctx.onmessage = (e: MessageEvent<ParseRequest>) => {
-	const { id, bodyText, bodyHtml } = e.data;
-	const content = bodyText || stripHTML(bodyHtml || "");
-	ctx.postMessage({ id, content });
+  const { id, bodyText, bodyHtml } = e.data;
+  const content = bodyText || stripHTML(bodyHtml || "");
+  ctx.postMessage({ id, content });
 };

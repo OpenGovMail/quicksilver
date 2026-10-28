@@ -8,38 +8,38 @@ import ProfileForm from "../moles/ProfileForm";
 import ProfileHeader from "../moles/ProfileHeader";
 
 function ProfilePage() {
-	const { activeAccount, updateAccount, signOut } = useAccount();
-	const navigate = useNavigate();
+  const { activeAccount, updateAccount, signOut } = useAccount();
+  const navigate = useNavigate();
 
-	const handleUpdateProfile = async (updateData) => {
-		if (!activeAccount) return;
-		updateAccount(activeAccount.id, updateData);
-	};
+  const handleUpdateProfile = async (updateData) => {
+    if (!activeAccount) return;
+    updateAccount(activeAccount.id, updateData);
+  };
 
-	const handleLogout = async () => {
-		if (activeAccount) await signOut(activeAccount.id);
-		navigate("/login");
-	};
+  const handleLogout = async () => {
+    if (activeAccount) await signOut(activeAccount.id);
+    navigate("/login");
+  };
 
-	return (
-		<AppLayout>
-			<Box sx={{ pb: 4 }}>
-				<ProfileHeader user={activeAccount} />
-				<ProfileForm user={activeAccount} onSubmit={handleUpdateProfile} />
-				<Box sx={{ maxWidth: 500, mx: "auto", px: 2, mt: 4 }}>
-					<Button
-						variant="outlined"
-						color="error"
-						fullWidth
-						startIcon={<LogoutIcon />}
-						onClick={handleLogout}
-					>
-						Sign Out
-					</Button>
-				</Box>
-			</Box>
-		</AppLayout>
-	);
+  return (
+    <AppLayout>
+      <Box sx={{ pb: 4 }}>
+        <ProfileHeader user={activeAccount} />
+        <ProfileForm user={activeAccount} onSubmit={handleUpdateProfile} />
+        <Box sx={{ maxWidth: 500, mx: "auto", px: 2, mt: 4 }}>
+          <Button
+            variant="outlined"
+            color="error"
+            fullWidth
+            startIcon={<LogoutIcon />}
+            onClick={handleLogout}
+          >
+            Sign Out
+          </Button>
+        </Box>
+      </Box>
+    </AppLayout>
+  );
 }
 
 export default ProfilePage;
