@@ -8,7 +8,7 @@ I have sorted my ideas into three priority groups.
 
 ### High Priority
 
-*Must have in base release.*
+_Must have in base release._
 
 - **Many use cases of SMS, Social Media Messaging and various "Productivity Apps", should be part of Email.**
   - A mobile email app that can compete with WhatsApp in terms of simplicity and ease-of-use.
@@ -26,7 +26,7 @@ I have sorted my ideas into three priority groups.
 
 ### Medium Priority
 
-*Expectations set that this will be happening in the medium term.*
+_Expectations set that this will be happening in the medium term._
 
 - **While attaching files is a common part of email, the technology for doing this is not tightly integrated.** Attachments are not "first class citizens" of email.
   - Ditto Calendars
@@ -46,7 +46,7 @@ I have sorted my ideas into three priority groups.
 
 ### Low Priority
 
-*Something we might get to, especially if the development community has some interest in designing & building this.*
+_Something we might get to, especially if the development community has some interest in designing & building this._
 
 - **Expectations on when email should be answered,** from both sender and receiver.
 

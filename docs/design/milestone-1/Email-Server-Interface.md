@@ -141,15 +141,15 @@ All user data is stored in browser localStorage - no database server required. T
 
 ### Division of Responsibilities
 
-| Component | Who Builds/Maintains | Our Responsibility |
-|-----------|---------------------|-------------------|
-| Frontend UI | Quicksilver Team | Design, implement, and maintain all React components |
-| Backend API | Quicksilver Team | Implement serverless API routes and business logic |
-| Data Storage | Browser localStorage | Store user profiles in browser (no database) |
+| Component             | Who Builds/Maintains       | Our Responsibility                                    |
+| --------------------- | -------------------------- | ----------------------------------------------------- |
+| Frontend UI           | Quicksilver Team           | Design, implement, and maintain all React components  |
+| Backend API           | Quicksilver Team           | Implement serverless API routes and business logic    |
+| Data Storage          | Browser localStorage       | Store user profiles in browser (no database)          |
 | IMAP/SMTP Connections | NPM Libraries + Our Config | Configure connections, handle errors, manage sessions |
-| Email Protocol | Standard (IETF) | Follow standards; use libraries for implementation |
-| Email Servers | Email Providers | They host and maintain; we just connect to them |
-| User Authentication | Frontend (localStorage) | Manage user session in browser |
+| Email Protocol        | Standard (IETF)            | Follow standards; use libraries for implementation    |
+| Email Servers         | Email Providers            | They host and maintain; we just connect to them       |
+| User Authentication   | Frontend (localStorage)    | Manage user session in browser                        |
 
 ## Standard Email Protocols
 
@@ -216,12 +216,12 @@ Collected during registration/profile setup:
 
 #### Supported Authentication Methods
 
-| Provider | Authentication Method | User Experience |
-|----------|----------------------|-----------------|
-| Gmail | App Password + IMAP/SMTP | Enter 16-char app password |
-| Outlook | App Password + IMAP/SMTP | Enter app-specific password |
-| Yahoo | IMAP/SMTP with App Password | Enter Yahoo app password |
-| Custom | IMAP/SMTP with credentials | Enter server details and password |
+| Provider | Authentication Method       | User Experience                   |
+| -------- | --------------------------- | --------------------------------- |
+| Gmail    | App Password + IMAP/SMTP    | Enter 16-char app password        |
+| Outlook  | App Password + IMAP/SMTP    | Enter app-specific password       |
+| Yahoo    | IMAP/SMTP with App Password | Enter Yahoo app password          |
+| Custom   | IMAP/SMTP with credentials  | Enter server details and password |
 
 ## Gmail Integration
 
@@ -486,13 +486,13 @@ These are **per-user** settings collected during registration or profile setup a
 
 ### Configuration Summary
 
-| Setting | Scope | Where Stored | Purpose |
-|---------|-------|--------------|----------|
-| `emailAddress` | User-level | Browser localStorage | User's actual email address |
+| Setting         | Scope      | Where Stored                     | Purpose                            |
+| --------------- | ---------- | -------------------------------- | ---------------------------------- |
+| `emailAddress`  | User-level | Browser localStorage             | User's actual email address        |
 | `emailPassword` | User-level | Browser localStorage (encrypted) | User's app password or credentials |
-| `imapConfig` | User-level | Browser localStorage | User's IMAP server settings |
-| `smtpConfig` | User-level | Browser localStorage | User's SMTP server settings |
-| User Profile | User-level | Browser localStorage | Complete user configuration |
+| `imapConfig`    | User-level | Browser localStorage             | User's IMAP server settings        |
+| `smtpConfig`    | User-level | Browser localStorage             | User's SMTP server settings        |
+| User Profile    | User-level | Browser localStorage             | Complete user configuration        |
 
 ### Provider Setup Resources
 

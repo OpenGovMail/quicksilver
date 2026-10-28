@@ -1,7 +1,7 @@
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import { Box, Button } from "@mui/material";
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Button } from "@mui/material";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import EmptyState from "../atoms/EmptyState";
 
 /**
@@ -10,35 +10,35 @@ import EmptyState from "../atoms/EmptyState";
  * Displays when user navigates to non-existent route
  */
 function NotFoundPage() {
-  const navigate = useNavigate();
+	const navigate = useNavigate();
 
-  const handleBackToMail = () => {
-    navigate("/");
-  };
+	const handleBackToMail = () => {
+		navigate("/");
+	};
 
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "100vh",
-        px: 2,
-      }}
-    >
-      <EmptyState
-        icon={<ErrorOutlineIcon sx={{ fontSize: 80 }} />}
-        title="Page Not Found"
-        description="The page you're looking for doesn't exist or has been moved."
-      />
-      <Box sx={{ mt: 3 }}>
-        <Button variant="contained" color="primary" onClick={handleBackToMail}>
-          Back to Mail
-        </Button>
-      </Box>
-    </Box>
-  );
+	return (
+		<Box
+			sx={{
+				display: "flex",
+				flexDirection: "column",
+				alignItems: "center",
+				justifyContent: "center",
+				minHeight: "100vh",
+				px: 2,
+			}}
+		>
+			<EmptyState
+				icon={<ErrorOutlineIcon sx={{ fontSize: 80 }} />}
+				title="Page Not Found"
+				description="The page you're looking for doesn't exist or has been moved."
+			/>
+			<Box sx={{ mt: 3 }}>
+				<Button variant="contained" color="primary" onClick={handleBackToMail}>
+					Back to Mail
+				</Button>
+			</Box>
+		</Box>
+	);
 }
 
 export default NotFoundPage;

@@ -1,36 +1,36 @@
+import { Fab, type FabProps } from "@mui/material";
 import React from "react";
-import { Fab, FabProps } from "@mui/material";
 
 const FloatingActionButton = ({
-  icon: Icon,
-  onClick,
-  ariaLabel,
-  color = "primary",
+	icon: Icon,
+	onClick,
+	ariaLabel,
+	color = "primary",
 }) => {
-  const renderIcon = () => {
-    if (!Icon) return null;
-    if (React.isValidElement(Icon)) return Icon;
-    if (typeof Icon === "function" || typeof Icon === "object") {
-      return React.createElement(Icon);
-    }
-    return null;
-  };
+	const renderIcon = () => {
+		if (!Icon) return null;
+		if (React.isValidElement(Icon)) return Icon;
+		if (typeof Icon === "function" || typeof Icon === "object") {
+			return React.createElement(Icon);
+		}
+		return null;
+	};
 
-  return (
-    <Fab
-      color={color as FabProps["color"]}
-      aria-label={ariaLabel}
-      onClick={onClick}
-      sx={{
-        position: "fixed",
-        bottom: 80,
-        right: 16,
-        display: { xs: "flex", md: "none" },
-      }}
-    >
-      {renderIcon()}
-    </Fab>
-  );
+	return (
+		<Fab
+			color={color as FabProps["color"]}
+			aria-label={ariaLabel}
+			onClick={onClick}
+			sx={{
+				position: "fixed",
+				bottom: 80,
+				right: 16,
+				display: { xs: "flex", md: "none" },
+			}}
+		>
+			{renderIcon()}
+		</Fab>
+	);
 };
 
 export default FloatingActionButton;
