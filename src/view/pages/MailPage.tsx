@@ -1,13 +1,13 @@
-import { useMemo, useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
-import { Fab, Box, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Fab, useMediaQuery, useTheme } from "@mui/material";
+import { useMemo, useState } from "react";
 import { Outlet, useMatch } from "react-router-dom";
-import AppLayout from "../moles/AppLayout";
-import ThreadList from "../moles/ThreadList";
 import { useData } from "../../nonview/core/DataContext";
-import { useCompose } from "../moles/ComposeProvider";
 import EmptyState from "../atoms/EmptyState";
+import AppLayout from "../moles/AppLayout";
+import { useCompose } from "../moles/ComposeProvider";
+import ThreadList from "../moles/ThreadList";
 
 function MailPage() {
   const theme = useTheme();
@@ -43,7 +43,9 @@ function MailPage() {
     <ThreadList
       threads={filteredThreads}
       loading={loading}
-      emptyMessage={searchQuery ? "No emails match your search" : "No emails yet"}
+      emptyMessage={
+        searchQuery ? "No emails match your search" : "No emails yet"
+      }
       onRefresh={searchQuery ? undefined : refreshActive}
       live={realtimeConnected}
       onPrefetch={prefetchMessages}
@@ -53,11 +55,17 @@ function MailPage() {
 
   return (
     <AppLayout
-      title={!isDesktop && matchThread ? (thread?.subject || "Thread") : "Quicksilver"}
-      titleIcon={(!isDesktop && matchThread) ? null : MailOutlineIcon}
+      title={
+        !isDesktop && matchThread ? thread?.subject || "Thread" : "Quicksilver"
+      }
+      titleIcon={!isDesktop && matchThread ? null : MailOutlineIcon}
       showSearch={!matchThread || isDesktop}
       onSearch={setSearchQuery}
-      actions={isDesktop ? [{ icon: EditIcon, label: "Compose", onClick: () => openCompose() }] : []}
+      actions={
+        isDesktop
+          ? [{ icon: EditIcon, label: "Compose", onClick: () => openCompose() }]
+          : []
+      }
     >
       {isDesktop ? (
         // Dark mode paints the whole split on the "deep space" gradient; the
@@ -103,7 +111,11 @@ function MailPage() {
               }),
             })}
           >
-            {matchThread ? <Outlet /> : <EmptyState title="Select an email to read" />}
+            {matchThread ? (
+              <Outlet />
+            ) : (
+              <EmptyState title="Select an email to read" />
+            )}
           </Box>
         </Box>
       ) : matchThread ? (

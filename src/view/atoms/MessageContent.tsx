@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Box, Typography } from "@mui/material";
 import DOMPurify from "dompurify";
+import type React from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 interface MessageContentProps {
   content: string;
@@ -36,11 +37,22 @@ const PURIFY_CONFIG: Parameters<typeof DOMPurify.sanitize>[1] = {
     "target",
     "rel",
   ],
-  FORBID_TAGS: ["script", "iframe", "object", "embed", "form", "input", "button", "meta", "base"],
+  FORBID_TAGS: [
+    "script",
+    "iframe",
+    "object",
+    "embed",
+    "form",
+    "input",
+    "button",
+    "meta",
+    "base",
+  ],
   FORBID_ATTR: ["srcset", "ping", "formaction"],
   ALLOW_DATA_ATTR: false,
   // Block javascript:/vbscript:/data: URLs in href/src.
-  ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel|cid):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+  ALLOWED_URI_REGEXP:
+    /^(?:(?:https?|mailto|tel|cid):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
 };
 
 // HTML wrapper for the iframe srcdoc. Inline CSS keeps email layouts
@@ -88,7 +100,10 @@ const IFRAME_HTML_HEAD = `
 
 const IFRAME_HTML_FOOT = `</body></html>`;
 
-const MessageContent: React.FC<MessageContentProps> = ({ content, contentHtml }) => {
+const MessageContent: React.FC<MessageContentProps> = ({
+  content,
+  contentHtml,
+}) => {
   const cleanHTML = useMemo(() => {
     if (!contentHtml) return null;
     // DOMPurify v3 types sanitize() as string | TrustedHTML; we never enable
@@ -131,7 +146,9 @@ const IsolatedHTML: React.FC<{ html: string }> = ({ html }) => {
 
   // Seed from the cache so a known email renders at its real height instantly;
   // 40 is a small neutral floor used only when nothing has been measured yet.
-  const [height, setHeight] = useState<number>(() => heightCache.get(srcDoc) ?? 40);
+  const [height, setHeight] = useState<number>(
+    () => heightCache.get(srcDoc) ?? 40,
+  );
   // resize() runs in listeners/timeouts that close over the initial render, so
   // read the latest height from a ref to avoid a stale-closure comparison.
   const heightRef = useRef(height);

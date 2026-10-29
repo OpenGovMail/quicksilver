@@ -1,13 +1,13 @@
+import { Snackbar } from "@mui/material";
 import {
   createContext,
   lazy,
+  type ReactNode,
   Suspense,
   useCallback,
   useContext,
   useState,
-  type ReactNode,
 } from "react";
-import { Snackbar } from "@mui/material";
 import type { ComposeInitial } from "./ComposePanel";
 
 // Compose pulls in react-email; keep it out of the main bundle and only load it

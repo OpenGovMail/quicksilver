@@ -1,21 +1,25 @@
-import React, { useState } from "react";
 import {
   Box,
-  Stack,
-  TextField,
   Button,
   CircularProgress,
   MenuItem,
-  Typography,
   MobileStepper,
+  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
+import type React from "react";
+import { useState } from "react";
+import type {
+  LinkedAccount,
+  RegistrationData,
+} from "../../nonview/core/accountStorage";
 import ErrorMessage from "../atoms/ErrorMessage";
-import type { LinkedAccount, RegistrationData } from "../../nonview/core/accountStorage";
 
 // Email service provider configurations
-// smtpSecure=true means implicit TLS (port 465); 
-// smtpSecure=false means STARTTLS on the submission port (587). 
-// Gmail/Outlook/Yahoo all support both 
+// smtpSecure=true means implicit TLS (port 465);
+// smtpSecure=false means STARTTLS on the submission port (587).
+// Gmail/Outlook/Yahoo all support both
 // we default to 465+implicit-TLS because it's a single negotiation and works
 // even when a network rewrites STARTTLS responses.
 const EMAIL_PROVIDERS = {
@@ -90,33 +94,39 @@ const AddAccountForm = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [createdAccount, setCreatedAccount] = useState<LinkedAccount | null>(null);
+  const [createdAccount, setCreatedAccount] = useState<LinkedAccount | null>(
+    null,
+  );
 
   const isBusy = loading || submitting;
 
-  const handleChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    let updates: Record<string, unknown> = { [field]: value };
+  const handleChange =
+    (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      let updates: Record<string, unknown> = { [field]: value };
 
-    // Auto-populate server settings when provider changes.
-    if (field === "emailServiceProvider" && EMAIL_PROVIDERS[value as keyof typeof EMAIL_PROVIDERS]) {
-      const provider = EMAIL_PROVIDERS[value as keyof typeof EMAIL_PROVIDERS];
-      updates = {
-        ...updates,
-        imapHost: provider.imapHost,
-        imapPort: provider.imapPort,
-        imapSecure: provider.imapSecure,
-        smtpHost: provider.smtpHost,
-        smtpPort: provider.smtpPort,
-        smtpSecure: provider.smtpSecure,
-      };
-    }
+      // Auto-populate server settings when provider changes.
+      if (
+        field === "emailServiceProvider" &&
+        EMAIL_PROVIDERS[value as keyof typeof EMAIL_PROVIDERS]
+      ) {
+        const provider = EMAIL_PROVIDERS[value as keyof typeof EMAIL_PROVIDERS];
+        updates = {
+          ...updates,
+          imapHost: provider.imapHost,
+          imapPort: provider.imapPort,
+          imapSecure: provider.imapSecure,
+          smtpHost: provider.smtpHost,
+          smtpPort: provider.smtpPort,
+          smtpSecure: provider.smtpSecure,
+        };
+      }
 
-    setFormData((prev) => ({ ...prev, ...updates }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }));
-    }
-  };
+      setFormData((prev) => ({ ...prev, ...updates }));
+      if (errors[field]) {
+        setErrors((prev) => ({ ...prev, [field]: "" }));
+      }
+    };
 
   const validateStep1 = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -189,7 +199,9 @@ const AddAccountForm = ({
       setCreatedAccount(account);
       setStep("success");
     } catch (error) {
-      setFormError((error as Error).message || "Registration failed. Please try again.");
+      setFormError(
+        (error as Error).message || "Registration failed. Please try again.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -205,13 +217,21 @@ const AddAccountForm = ({
           activeStep={step - 1}
           backButton={<span />}
           nextButton={<span />}
-          sx={{ justifyContent: "center", bgcolor: "transparent", px: 0, mb: 3 }}
+          sx={{
+            justifyContent: "center",
+            bgcolor: "transparent",
+            px: 0,
+            mb: 3,
+          }}
         />
       )}
 
       {formError && step !== "success" && (
         <Box sx={{ mb: 2 }}>
-          <ErrorMessage message={formError} onDismiss={() => setFormError("")} />
+          <ErrorMessage
+            message={formError}
+            onDismiss={() => setFormError("")}
+          />
         </Box>
       )}
 
@@ -292,7 +312,10 @@ const AddAccountForm = ({
             value={formData.emailAddress}
             onChange={handleChange("emailAddress")}
             error={!!errors.emailAddress}
-            helperText={errors.emailAddress || "Your actual email address (e.g., yourname@gmail.com)"}
+            helperText={
+              errors.emailAddress ||
+              "Your actual email address (e.g., yourname@gmail.com)"
+            }
             required
             fullWidth
             variant="outlined"
@@ -304,7 +327,10 @@ const AddAccountForm = ({
             value={formData.emailPassword}
             onChange={handleChange("emailPassword")}
             error={!!errors.emailPassword}
-            helperText={errors.emailPassword || "For Gmail/Outlook, use an app-specific password"}
+            helperText={
+              errors.emailPassword ||
+              "For Gmail/Outlook, use an app-specific password"
+            }
             required
             fullWidth
             variant="outlined"
@@ -313,7 +339,9 @@ const AddAccountForm = ({
 
           {formData.emailServiceProvider === "custom" && (
             <>
-              <Typography variant="subtitle2">IMAP Settings (Incoming Mail)</Typography>
+              <Typography variant="subtitle2">
+                IMAP Settings (Incoming Mail)
+              </Typography>
               <TextField
                 label="IMAP Host"
                 type="text"
@@ -337,7 +365,9 @@ const AddAccountForm = ({
                 disabled={isBusy}
               />
 
-              <Typography variant="subtitle2">SMTP Settings (Outgoing Mail)</Typography>
+              <Typography variant="subtitle2">
+                SMTP Settings (Outgoing Mail)
+              </Typography>
               <TextField
                 label="SMTP Host"
                 type="text"
@@ -382,12 +412,20 @@ const AddAccountForm = ({
       )}
 
       {step === "success" && createdAccount && (
-        <Stack spacing={2} alignItems="center" sx={{ textAlign: "center", py: 2 }}>
+        <Stack
+          spacing={2}
+          alignItems="center"
+          sx={{ textAlign: "center", py: 2 }}
+        >
           <Typography variant="h6">Account added successfully!</Typography>
           <Typography variant="body2" color="text.secondary">
             {createdAccount.email} is now available in the account switcher.
           </Typography>
-          <Button variant="contained" color="primary" onClick={() => onSuccess(createdAccount)}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => onSuccess(createdAccount)}
+          >
             {successCtaLabel}
           </Button>
         </Stack>

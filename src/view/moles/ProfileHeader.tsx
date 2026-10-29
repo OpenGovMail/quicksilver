@@ -1,5 +1,5 @@
+import { Avatar, Box, Typography } from "@mui/material";
 import React from "react";
-import { Box, Typography, Avatar } from "@mui/material";
 import { getInitials } from "../_constants/avatarUtils";
 
 /**

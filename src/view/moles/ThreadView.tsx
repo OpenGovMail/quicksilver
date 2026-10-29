@@ -1,7 +1,7 @@
-import React from "react";
 import { Box } from "@mui/material";
-import MessageGroup from "./MessageGroup";
+import React from "react";
 import MessageSkeleton from "../atoms/MessageSkeleton";
+import MessageGroup from "./MessageGroup";
 
 const groupMessages = (messages = []) => {
   const groups = [];

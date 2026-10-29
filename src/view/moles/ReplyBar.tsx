@@ -1,8 +1,8 @@
-import type { KeyboardEvent } from "react";
-import { Box, IconButton, InputBase, Paper, Tooltip } from "@mui/material";
-import ReplyAllIcon from "@mui/icons-material/ReplyAll";
 import EditIcon from "@mui/icons-material/Edit";
+import ReplyAllIcon from "@mui/icons-material/ReplyAll";
 import SendIcon from "@mui/icons-material/Send";
+import { Box, IconButton, InputBase, Paper, Tooltip } from "@mui/material";
+import type { KeyboardEvent } from "react";
 
 interface ReplyBarProps {
   value: string;
@@ -32,7 +32,9 @@ const ReplyBar = ({
 }: ReplyBarProps) => {
   const canSend = value.trim().length > 0 && !sending;
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleKeyDown = (
+    e: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       if (canSend) onSend();
@@ -122,7 +124,8 @@ const ReplyBar = ({
                 color: "#F0F5F1",
                 border: "1px solid rgba(61, 139, 78, 0.4)",
                 boxShadow: "none",
-                transition: "transform 0.15s, background-color 0.2s, box-shadow 0.2s",
+                transition:
+                  "transform 0.15s, background-color 0.2s, box-shadow 0.2s",
                 "&:hover": {
                   backgroundColor: "#4A9E5C",
                   transform: "scale(1.05)",

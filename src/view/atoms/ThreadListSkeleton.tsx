@@ -1,5 +1,5 @@
-import React from "react";
 import { Box, Skeleton } from "@mui/material";
+import type React from "react";
 
 // Skeleton placeholder for the mailbox list (proposal §7, "skeleton loading
 // states"). Mirrors ThreadListItem's layout — avatar + three text rows — so the

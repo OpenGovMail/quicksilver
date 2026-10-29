@@ -107,7 +107,11 @@ export class APIClient {
     });
     if (!res.ok) {
       if (res.status === 401) this.onUnauthorized();
-      throw new APIError(res.status, "unknown", `request failed (${res.status})`);
+      throw new APIError(
+        res.status,
+        "unknown",
+        `request failed (${res.status})`,
+      );
     }
     return res.blob();
   }
@@ -144,7 +148,8 @@ export class APIClient {
 // Resolves the API base URL from Vite env, falling back to a same-origin /api
 // proxy. Set VITE_API_BASE_URL to override (e.g. http://localhost:8080).
 export function defaultBaseURL(): string {
-  const envURL = (import.meta.env.VITE_API_BASE_URL as string | undefined) || "";
+  const envURL =
+    (import.meta.env.VITE_API_BASE_URL as string | undefined) || "";
   if (envURL) return envURL;
   // Same-origin default: the Vite dev server / hosting proxies /api → backend.
   return "";

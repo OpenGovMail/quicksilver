@@ -1,9 +1,9 @@
-import React from "react";
-import { Box, IconButton } from "@mui/material";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import DownloadIcon from "@mui/icons-material/Download";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import CloseIcon from "@mui/icons-material/Close";
+import DownloadIcon from "@mui/icons-material/Download";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { Box, IconButton } from "@mui/material";
+import React from "react";
 import AttachmentInfo from "../atoms/AttachmentInfo";
 
 // Which MIME types the in-app viewer can render inline (see AttachmentViewer).
@@ -35,10 +35,7 @@ const AttachmentPreview = ({
       <AttachmentInfo name={attachment.name} size={attachment.size} />
       <Box sx={{ flex: 1 }} />
       {canPreview && (
-        <IconButton
-          aria-label="preview"
-          onClick={() => onPreview(attachment)}
-        >
+        <IconButton aria-label="preview" onClick={() => onPreview(attachment)}>
           <VisibilityIcon />
         </IconButton>
       )}

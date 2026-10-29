@@ -55,7 +55,8 @@ export const mailboxes = {
     const params = new URLSearchParams();
     if (opts.uidvalidity) params.set("uidvalidity", String(opts.uidvalidity));
     if (opts.limit) params.set("limit", String(opts.limit));
-    if (opts.known && opts.known.length) params.set("known", opts.known.join(","));
+    if (opts.known && opts.known.length)
+      params.set("known", opts.known.join(","));
     const qs = params.toString();
     const path = `${v1}/mailboxes/${encodeURIComponent(mailbox)}/changes${
       qs ? `?${qs}` : ""
@@ -122,7 +123,12 @@ export const messages = {
   // Looks up a message's UID in a mailbox by its Message-ID header. Needed to
   // target a message again after a cross-mailbox move (the move response
   // doesn't carry the destination UID).
-  find(client: APIClient, mailbox: string, messageId: string, signal?: AbortSignal) {
+  find(
+    client: APIClient,
+    mailbox: string,
+    messageId: string,
+    signal?: AbortSignal,
+  ) {
     return client.get<{ uid: number }>(
       `${v1}/mailboxes/${encodeURIComponent(mailbox)}/messages/find?message_id=${encodeURIComponent(messageId)}`,
       signal,

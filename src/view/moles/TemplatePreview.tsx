@@ -1,7 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { Box, CircularProgress, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import DesktopWindowsOutlinedIcon from "@mui/icons-material/DesktopWindowsOutlined";
 import PhoneIphoneOutlinedIcon from "@mui/icons-material/PhoneIphoneOutlined";
+import {
+  Box,
+  CircularProgress,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+} from "@mui/material";
+import type React from "react";
+import { useEffect, useState } from "react";
 import { renderTemplate } from "../../nonview/email/renderTemplate";
 import type { TemplateValues } from "../../nonview/email/templates";
 
@@ -14,7 +21,10 @@ interface TemplatePreviewProps {
 // inside a sandboxed iframe so the email's own styles can't leak into the app.
 // Re-renders whenever the template or its values change, debounced lightly so
 // typing stays smooth.
-const TemplatePreview: React.FC<TemplatePreviewProps> = ({ templateId, values }) => {
+const TemplatePreview: React.FC<TemplatePreviewProps> = ({
+  templateId,
+  values,
+}) => {
   const [html, setHtml] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
@@ -65,7 +75,11 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ templateId, values })
           backgroundColor: "background.paper",
         }}
       >
-        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ fontWeight: 600 }}
+        >
           Live preview
         </Typography>
         <ToggleButtonGroup
@@ -83,7 +97,14 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ templateId, values })
         </ToggleButtonGroup>
       </Box>
 
-      <Box sx={{ position: "relative", flex: 1, overflow: "auto", p: device === "mobile" ? 2 : 0 }}>
+      <Box
+        sx={{
+          position: "relative",
+          flex: 1,
+          overflow: "auto",
+          p: device === "mobile" ? 2 : 0,
+        }}
+      >
         {loading && (
           <Box
             sx={{

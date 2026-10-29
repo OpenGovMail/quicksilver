@@ -1,4 +1,5 @@
-import React, {
+import type React from "react";
+import {
   createContext,
   useCallback,
   useContext,
@@ -7,19 +8,10 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useAccount } from "./AccountContext";
-import { parseBody } from "./messageParser";
-import { mailboxes as mailboxesAPI, messages as messagesAPI } from "../api/endpoints";
 import {
-  readThreads,
-  writeThreads,
-  removeThread,
-  patchThread,
-  readBody,
-  writeBody,
-  readUidValidity,
-  writeUidValidity,
-} from "../cache/db";
+  mailboxes as mailboxesAPI,
+  messages as messagesAPI,
+} from "../api/endpoints";
 import type {
   Address,
   AttachmentMeta,
@@ -28,6 +20,18 @@ import type {
   Message,
   MessageListResponse,
 } from "../api/types";
+import {
+  patchThread,
+  readBody,
+  readThreads,
+  readUidValidity,
+  removeThread,
+  writeBody,
+  writeThreads,
+  writeUidValidity,
+} from "../cache/db";
+import { useAccount } from "./AccountContext";
+import { parseBody } from "./messageParser";
 
 // Thread is the shape consumed by existing UI components. Each backend
 // Envelope maps 1:1 to one Thread (server-side threading is a future phase).
@@ -61,8 +65,8 @@ export interface Thread {
 export interface ThreadMessage {
   id: string;
   sourceThreadId?: string;
-  content: string;        // plain-text fallback
-  contentHtml?: string;   // raw HTML from the upstream message; render only after sanitisation
+  content: string; // plain-text fallback
+  contentHtml?: string; // raw HTML from the upstream message; render only after sanitisation
   sender: Participant;
   // Addressing details for the participant hover-card. Bcc is not exposed by
   // IMAP for received mail, so only To/Cc are available.
@@ -225,10 +229,15 @@ function normalizeSubject(subject: string): string {
   return (stripped || "(no subject)").toLowerCase();
 }
 
-const byTimestampAsc = (a: { timestamp: string }, b: { timestamp: string }): number =>
-  new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+const byTimestampAsc = (
+  a: { timestamp: string },
+  b: { timestamp: string },
+): number => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
 
-const byLastMessageDesc = (a: { lastMessageTime: string }, b: { lastMessageTime: string }): number =>
+const byLastMessageDesc = (
+  a: { lastMessageTime: string },
+  b: { lastMessageTime: string },
+): number =>
   new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime();
 
 function groupThreadsBySubject(sourceThreads: Thread[]): Thread[] {
@@ -257,7 +266,10 @@ function groupThreadsBySubject(sourceThreads: Thread[]): Thread[] {
         id: `group:${encodeURIComponent(key)}`,
         subject: latest.subject || "(No subject)",
         participants: Array.from(participants.values()),
-        unreadCount: sorted.reduce((count, thread) => count + thread.unreadCount, 0),
+        unreadCount: sorted.reduce(
+          (count, thread) => count + thread.unreadCount,
+          0,
+        ),
         hasAttachment: sorted.some((thread) => thread.hasAttachment),
         sourceThreadIds: sorted.map((thread) => thread.id),
         isTrashed: sorted.every((thread) => thread.inTrash),
@@ -308,7 +320,8 @@ function messageToThreadMessage(
     cc: addressesToParticipants(m.cc),
     timestamp: m.date,
     isRead: (m.flags || []).includes("\\Seen"),
-    attachments: m.attachments && m.attachments.length ? m.attachments : undefined,
+    attachments:
+      m.attachments && m.attachments.length ? m.attachments : undefined,
   };
 }
 
@@ -363,9 +376,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     if (sent.length) setSentThreads(sent);
     if (draftsC.length) setDrafts(draftsC);
     if (trash.length) setTrashedThreads(trash);
-    return (
-      inbox.length + sent.length + draftsC.length + trash.length > 0
-    );
+    return inbox.length + sent.length + draftsC.length + trash.length > 0;
   }, [account]);
 
   const loadAll = useCallback(
@@ -388,16 +399,36 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         // the successful folders' data.
         const settled = await Promise.allSettled([
           roles.inbox
-            ? mailboxesAPI.listMessages(apiClient, roles.inbox, { limit: PAGE_SIZE }, signal)
+            ? mailboxesAPI.listMessages(
+                apiClient,
+                roles.inbox,
+                { limit: PAGE_SIZE },
+                signal,
+              )
             : Promise.resolve({ messages: [] }),
           roles.sent
-            ? mailboxesAPI.listMessages(apiClient, roles.sent, { limit: PAGE_SIZE }, signal)
+            ? mailboxesAPI.listMessages(
+                apiClient,
+                roles.sent,
+                { limit: PAGE_SIZE },
+                signal,
+              )
             : Promise.resolve({ messages: [] }),
           roles.drafts
-            ? mailboxesAPI.listMessages(apiClient, roles.drafts, { limit: PAGE_SIZE }, signal)
+            ? mailboxesAPI.listMessages(
+                apiClient,
+                roles.drafts,
+                { limit: PAGE_SIZE },
+                signal,
+              )
             : Promise.resolve({ messages: [] }),
           roles.trash
-            ? mailboxesAPI.listMessages(apiClient, roles.trash, { limit: PAGE_SIZE }, signal)
+            ? mailboxesAPI.listMessages(
+                apiClient,
+                roles.trash,
+                { limit: PAGE_SIZE },
+                signal,
+              )
             : Promise.resolve({ messages: [] }),
         ]);
 
@@ -411,13 +442,16 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           set: React.Dispatch<React.SetStateAction<Thread[]>>,
         ) => {
           if (settled[idx].status !== "fulfilled") return; // keep cached rows
-          const val = (settled[idx] as PromiseFulfilledResult<MessageListResponse>).value;
+          const val = (
+            settled[idx] as PromiseFulfilledResult<MessageListResponse>
+          ).value;
           const msgs = val.messages || [];
           const fresh = msgs.map((e) => envelopeToThread(e, mailbox || ""));
           set(fresh);
           void writeThreads(account, role, fresh);
           // Persist UIDVALIDITY so a later refresh can sync via a delta.
-          if (val.uidvalidity) void writeUidValidity(account, role, val.uidvalidity);
+          if (val.uidvalidity)
+            void writeUidValidity(account, role, val.uidvalidity);
           // Reset to page 0; cursor for page 1 is this page's next_before.
           pageCursors.current[role] = [undefined, val.next_before];
           setPage((p) => ({ ...p, [role]: 0 }));
@@ -512,7 +546,11 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   // infinite scroll, which appends). `target` is the destination page index;
   // `before` is the cursor for that page (undefined = newest/page 0).
   const fetchPage = useCallback(
-    async (role: string, target: number, before: number | undefined): Promise<void> => {
+    async (
+      role: string,
+      target: number,
+      before: number | undefined,
+    ): Promise<void> => {
       const mailbox = rolesRef.current[role];
       const set = setterForRole(role);
       if (!mailbox || !set) return;
@@ -537,7 +575,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         // Only page 0 is mirrored to the offline cache (the "newest" view).
         if (target === 0) {
           void writeThreads(account, role, fresh);
-          if (resp.uidvalidity) void writeUidValidity(account, role, resp.uidvalidity);
+          if (resp.uidvalidity)
+            void writeUidValidity(account, role, resp.uidvalidity);
         }
       } catch (err) {
         if ((err as { name?: string })?.name !== "AbortError") {
@@ -684,7 +723,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     }
     setError(null);
     const roles = ["inbox", "sent", "drafts", "trash"];
-    const results = await Promise.allSettled(roles.map((role) => syncRole(role)));
+    const results = await Promise.allSettled(
+      roles.map((role) => syncRole(role)),
+    );
     const failed = results
       .map((s, i) => ({ s, role: roles[i] }))
       .filter(({ s }) => s.status === "rejected");
@@ -745,7 +786,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     const onChanged = (e: MessageEvent) => {
       let mailbox = inboxName;
       try {
-        mailbox = (JSON.parse(e.data) as { mailbox?: string }).mailbox || inboxName;
+        mailbox =
+          (JSON.parse(e.data) as { mailbox?: string }).mailbox || inboxName;
       } catch {
         // Malformed payload — fall back to syncing the inbox.
       }
@@ -802,7 +844,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const resolveThreadIds = useCallback(
     (threadId: string): string[] => {
       const grouped = emailThreadsById.get(threadId);
-      return grouped?.sourceThreadIds?.length ? grouped.sourceThreadIds : [threadId];
+      return grouped?.sourceThreadIds?.length
+        ? grouped.sourceThreadIds
+        : [threadId];
     },
     [emailThreadsById],
   );
@@ -822,7 +866,11 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         threadIds.map(async (sourceThreadId) => {
           const parsed = parseThreadID(sourceThreadId);
           if (!parsed) return null;
-          const msg = await messagesAPI.get(apiClient, parsed.mailbox, parsed.uid);
+          const msg = await messagesAPI.get(
+            apiClient,
+            parsed.mailbox,
+            parsed.uid,
+          );
           const content = await parseBody(msg.body_text, msg.body_html);
           const tm = messageToThreadMessage(msg, content, sourceThreadId);
           // A message sourced from the Trash folder renders in its "In Trash"
@@ -855,7 +903,11 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
             // Skip local-only drafts (uid 0), malformed ids, and cached bodies.
             if (!parsed || parsed.uid <= 0) return;
             if (await readBody(account, sourceThreadId)) return;
-            const msg = await messagesAPI.get(apiClient, parsed.mailbox, parsed.uid);
+            const msg = await messagesAPI.get(
+              apiClient,
+              parsed.mailbox,
+              parsed.uid,
+            );
             const content = await parseBody(msg.body_text, msg.body_html);
             await writeBody(
               account,
@@ -923,16 +975,18 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     async (threadId: string): Promise<ThreadMessage[] | null> => {
       const trashName = rolesRef.current.trash || "Trash";
       const cached = await Promise.all(
-        resolveThreadIds(threadId).map(async (sourceThreadId): Promise<ThreadMessage | null> => {
-          const message = await readBody(account, sourceThreadId);
-          if (!message) return null;
-          const parsed = parseThreadID(sourceThreadId);
-          return {
-            ...message,
-            sourceThreadId,
-            deleted: parsed?.mailbox === trashName || undefined,
-          };
-        }),
+        resolveThreadIds(threadId).map(
+          async (sourceThreadId): Promise<ThreadMessage | null> => {
+            const message = await readBody(account, sourceThreadId);
+            if (!message) return null;
+            const parsed = parseThreadID(sourceThreadId);
+            return {
+              ...message,
+              sourceThreadId,
+              deleted: parsed?.mailbox === trashName || undefined,
+            };
+          },
+        ),
       );
       const messages = cached
         .filter((message): message is ThreadMessage => Boolean(message))
@@ -973,30 +1027,27 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     [apiClient],
   );
 
-  const saveDraft = useCallback(
-    async (data: DraftData): Promise<Thread> => {
-      // The backend doesn't implement APPEND to Drafts yet; keep the legacy
-      // local-only behaviour so the UI still works for in-progress composition.
-      const draft: Thread = {
-        id: `local-draft-${Date.now()}`,
-        subject: data.subject || "(No subject)",
-        participants: (data.to || []).map((a, i) => ({
-          id: a.email || `to-${i}`,
-          name: a.name || a.email || "",
-          email: a.email || "",
-        })),
-        lastMessage: data.body || "",
-        lastMessageTime: new Date().toISOString(),
-        unreadCount: 0,
-        hasAttachment: (data.attachments?.length || 0) > 0,
-        mailbox: rolesRef.current.drafts || "Drafts",
-        uid: 0,
-      };
-      setDrafts((prev) => [draft, ...prev]);
-      return draft;
-    },
-    [],
-  );
+  const saveDraft = useCallback(async (data: DraftData): Promise<Thread> => {
+    // The backend doesn't implement APPEND to Drafts yet; keep the legacy
+    // local-only behaviour so the UI still works for in-progress composition.
+    const draft: Thread = {
+      id: `local-draft-${Date.now()}`,
+      subject: data.subject || "(No subject)",
+      participants: (data.to || []).map((a, i) => ({
+        id: a.email || `to-${i}`,
+        name: a.name || a.email || "",
+        email: a.email || "",
+      })),
+      lastMessage: data.body || "",
+      lastMessageTime: new Date().toISOString(),
+      unreadCount: 0,
+      hasAttachment: (data.attachments?.length || 0) > 0,
+      mailbox: rolesRef.current.drafts || "Drafts",
+      uid: 0,
+    };
+    setDrafts((prev) => [draft, ...prev]);
+    return draft;
+  }, []);
 
   const deleteThread = useCallback(
     async (threadId: string): Promise<void> => {
@@ -1041,7 +1092,12 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       void removeThread(account, threadId);
 
       try {
-        await messagesAPI.remove(apiClient, parsed.mailbox, parsed.uid, archive);
+        await messagesAPI.remove(
+          apiClient,
+          parsed.mailbox,
+          parsed.uid,
+          archive,
+        );
       } catch (err) {
         setThreads(snapshot.threads);
         setSentThreads(snapshot.sentThreads);
@@ -1058,13 +1114,18 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const threadIds = resolveThreadIds(threadId);
       const ids = new Set(threadIds);
       const setUnread = (n: number) =>
-        [setThreads, setSentThreads, setDrafts, setTrashedThreads].forEach((set) =>
-          set((prev) => prev.map((t) => (ids.has(t.id) ? { ...t, unreadCount: n } : t))),
+        [setThreads, setSentThreads, setDrafts, setTrashedThreads].forEach(
+          (set) =>
+            set((prev) =>
+              prev.map((t) => (ids.has(t.id) ? { ...t, unreadCount: n } : t)),
+            ),
         );
 
       // Optimistic: clear the unread badge instantly in state and cache.
       setUnread(0);
-      threadIds.forEach((id) => void patchThread(account, id, { unreadCount: 0 }));
+      threadIds.forEach(
+        (id) => void patchThread(account, id, { unreadCount: 0 }),
+      );
 
       try {
         await Promise.all(
@@ -1083,7 +1144,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       } catch (err) {
         // Restore the unread badge if the flag update didn't stick.
         setUnread(1);
-        threadIds.forEach((id) => void patchThread(account, id, { unreadCount: 1 }));
+        threadIds.forEach(
+          (id) => void patchThread(account, id, { unreadCount: 1 }),
+        );
         throw err;
       }
     },
@@ -1124,10 +1187,13 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const parsed = parseThreadID(threadId);
       if (!parsed || parsed.uid <= 0) return;
       const setUnread = (n: number) =>
-        [setThreads, setSentThreads, setDrafts, setTrashedThreads].forEach((set) =>
-          set((prev) =>
-            prev.map((t) => (t.id === threadId ? { ...t, unreadCount: n } : t)),
-          ),
+        [setThreads, setSentThreads, setDrafts, setTrashedThreads].forEach(
+          (set) =>
+            set((prev) =>
+              prev.map((t) =>
+                t.id === threadId ? { ...t, unreadCount: n } : t,
+              ),
+            ),
         );
 
       setUnread(1);

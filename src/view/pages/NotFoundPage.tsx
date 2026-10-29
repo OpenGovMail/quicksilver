@@ -1,7 +1,7 @@
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import { Box, Button } from "@mui/material";
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Button } from "@mui/material";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import EmptyState from "../atoms/EmptyState";
 
 /**

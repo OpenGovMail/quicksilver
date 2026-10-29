@@ -1,5 +1,5 @@
+import { Fab, type FabProps } from "@mui/material";
 import React from "react";
-import { Fab, FabProps } from "@mui/material";
 
 const FloatingActionButton = ({
   icon: Icon,

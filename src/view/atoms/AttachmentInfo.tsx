@@ -1,5 +1,5 @@
-import React from "react";
 import { Box, Typography } from "@mui/material";
+import React from "react";
 
 const formatFileSize = (size) => {
   if (!size && size !== 0) return "";

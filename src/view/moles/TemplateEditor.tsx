@@ -1,8 +1,18 @@
-import React from "react";
-import { Box, Button, InputAdornment, TextField, Typography } from "@mui/material";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
+import {
+  Box,
+  Button,
+  InputAdornment,
+  TextField,
+  Typography,
+} from "@mui/material";
+import type React from "react";
+import type {
+  EmailTemplate,
+  TemplateField,
+  TemplateValues,
+} from "../../nonview/email/templates";
 import TemplatePreview from "./TemplatePreview";
-import type { EmailTemplate, TemplateField, TemplateValues } from "../../nonview/email/templates";
 
 interface TemplateEditorProps {
   template: EmailTemplate;
@@ -17,7 +27,8 @@ const FieldInput: React.FC<{
   onChange: (v: string) => void;
 }> = ({ field, value, onChange }) => {
   const isMarkdown = field.type === "markdown";
-  const multiline = field.type === "textarea" || field.type === "list" || isMarkdown;
+  const multiline =
+    field.type === "textarea" || field.type === "list" || isMarkdown;
   return (
     <TextField
       label={field.label}
@@ -40,25 +51,24 @@ const FieldInput: React.FC<{
                 fontSize: 13,
               },
             }
-          :
-        field.type === "color"
-          ? {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Box
-                    sx={{
-                      width: 16,
-                      height: 16,
-                      borderRadius: "3px",
-                      backgroundColor: value || "#000",
-                      border: 1,
-                      borderColor: "divider",
-                    }}
-                  />
-                </InputAdornment>
-              ),
-            }
-          : undefined
+          : field.type === "color"
+            ? {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Box
+                      sx={{
+                        width: 16,
+                        height: 16,
+                        borderRadius: "3px",
+                        backgroundColor: value || "#000",
+                        border: 1,
+                        borderColor: "divider",
+                      }}
+                    />
+                  </InputAdornment>
+                ),
+              }
+            : undefined
       }
     />
   );
@@ -75,7 +85,13 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
 }) => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Box sx={{ fontSize: 22 }}>{template.icon}</Box>
           <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
@@ -97,7 +113,11 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" },
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "repeat(2, 1fr)",
+            md: "repeat(3, 1fr)",
+          },
           gap: 2,
           alignItems: "start",
         }}
@@ -107,7 +127,11 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
             f.type === "markdown" || f.type === "textarea" || f.type === "list";
           return (
             <Box key={f.key} sx={{ gridColumn: fullWidth ? "1 / -1" : "auto" }}>
-              <FieldInput field={f} value={values[f.key]} onChange={(v) => onChange(f.key, v)} />
+              <FieldInput
+                field={f}
+                value={values[f.key]}
+                onChange={(v) => onChange(f.key, v)}
+              />
             </Box>
           );
         })}

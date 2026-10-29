@@ -1,4 +1,5 @@
-import React from "react";
+import CloseIcon from "@mui/icons-material/Close";
+import DownloadIcon from "@mui/icons-material/Download";
 import {
   Box,
   CircularProgress,
@@ -8,8 +9,7 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import DownloadIcon from "@mui/icons-material/Download";
+import React from "react";
 
 // In-app attachment preview. Renders images and PDFs inline from a blob object
 // URL (fetched with the auth header upstream), so the user can view an

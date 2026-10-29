@@ -5,7 +5,10 @@
 // has no Worker support (or the worker fails to spawn), it does the same work
 // synchronously so the read view never breaks — just without the off-thread win.
 
-import type { ParseRequest, ParseResponse } from "../workers/messageParser.worker";
+import type {
+  ParseRequest,
+  ParseResponse,
+} from "../workers/messageParser.worker";
 
 // Fallback stripper, identical to the one inside the worker. Used when no worker
 // is available or a request times out.
@@ -59,7 +62,10 @@ function ensureWorker(): Worker | null {
 
 // Derive the plain-text representation of a message body off the main thread.
 // Resolves with the synchronous fallback if the worker is unavailable or slow.
-export function parseBody(bodyText?: string, bodyHtml?: string): Promise<string> {
+export function parseBody(
+  bodyText?: string,
+  bodyHtml?: string,
+): Promise<string> {
   const w = ensureWorker();
   if (!w) return Promise.resolve(fallback(bodyText, bodyHtml));
 

@@ -32,7 +32,13 @@ export interface RegistrationData extends Omit<LinkedAccount, "id"> {
 export function toLoginRequest(
   account: Pick<
     LinkedAccount,
-    "email" | "imapHost" | "imapPort" | "imapSecure" | "smtpHost" | "smtpPort" | "smtpSecure"
+    | "email"
+    | "imapHost"
+    | "imapPort"
+    | "imapSecure"
+    | "smtpHost"
+    | "smtpPort"
+    | "smtpSecure"
   >,
   password: string,
 ): LoginRequest {

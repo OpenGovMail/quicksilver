@@ -1,15 +1,15 @@
-import React from "react";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
   Button,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import type React from "react";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -39,7 +39,13 @@ const ConfirmDialog = ({
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   return (
-    <Dialog open={open} onClose={onCancel} fullScreen={fullScreen} maxWidth="xs" fullWidth>
+    <Dialog
+      open={open}
+      onClose={onCancel}
+      fullScreen={fullScreen}
+      maxWidth="xs"
+      fullWidth
+    >
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <DialogContentText component="div">{message}</DialogContentText>
@@ -53,7 +59,9 @@ const ConfirmDialog = ({
           color={confirmColor}
           variant="contained"
           disabled={loading}
-          startIcon={loading ? <CircularProgress size={16} color="inherit" /> : null}
+          startIcon={
+            loading ? <CircularProgress size={16} color="inherit" /> : null
+          }
         >
           {confirmLabel}
         </Button>

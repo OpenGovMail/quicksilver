@@ -1,19 +1,19 @@
-import { useMemo, useRef, useState } from "react";
 import { Box } from "@mui/material";
-import ComposeHeader from "./ComposeHeader";
-import ComposeForm from "./ComposeForm";
-import AttachmentList from "./AttachmentList";
-import { useData } from "../../nonview/core/DataContext";
-import type { RecipientInputHandle } from "./RecipientInput";
+import { useMemo, useRef, useState } from "react";
 import type { Address } from "../../nonview/api/types";
+import { useData } from "../../nonview/core/DataContext";
+import { plainTextToHtml } from "../../nonview/email/plainText";
+import { renderTemplate } from "../../nonview/email/renderTemplate";
 import {
   defaultValues,
-  getTemplate,
   type EmailTemplate,
+  getTemplate,
   type TemplateValues,
 } from "../../nonview/email/templates";
-import { renderTemplate } from "../../nonview/email/renderTemplate";
-import { plainTextToHtml } from "../../nonview/email/plainText";
+import AttachmentList from "./AttachmentList";
+import ComposeForm from "./ComposeForm";
+import ComposeHeader from "./ComposeHeader";
+import type { RecipientInputHandle } from "./RecipientInput";
 
 type ComposeMode = "plaintext" | "template";
 
@@ -184,7 +184,10 @@ const ComposePanel = ({
       body: built.textToSend,
       attachments,
     });
-    (onSavedDraft || (() => onSent({ content: built.content, subject: finalSubject })))();
+    (
+      onSavedDraft ||
+      (() => onSent({ content: built.content, subject: finalSubject }))
+    )();
   };
 
   return (

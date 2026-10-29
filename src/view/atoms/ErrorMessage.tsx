@@ -1,6 +1,6 @@
-import React from "react";
-import { Alert, AlertColor, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import { Alert, type AlertColor, IconButton } from "@mui/material";
+import React from "react";
 
 const ErrorMessage = ({
   message,
@@ -11,7 +11,9 @@ const ErrorMessage = ({
   if (!message) return null;
 
   // Support variant prop for backward compatibility
-  const alertSeverity = (variant === "success" ? "success" : severity) as AlertColor;
+  const alertSeverity = (
+    variant === "success" ? "success" : severity
+  ) as AlertColor;
 
   return (
     <Alert

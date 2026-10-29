@@ -7,8 +7,8 @@
 // assembled (a plain-text reply to an HTML mail still quotes the real HTML).
 
 import type { Address } from "../api/types";
-import type { Thread, ThreadMessage } from "./DataContext";
 import { escapeHtml, plainTextToHtml } from "../email/plainText";
+import type { Thread, ThreadMessage } from "./DataContext";
 
 export type ReplyMode = "reply" | "replyAll" | "forward";
 
@@ -55,8 +55,7 @@ const asMessageId = (id?: string): string | undefined =>
 const fmtDate = (ts?: string): string =>
   ts ? new Date(ts).toLocaleString() : "";
 
-const attributionStyle =
-  'style="margin:16px 0 8px;color:#555;font-size:13px;"';
+const attributionStyle = 'style="margin:16px 0 8px;color:#555;font-size:13px;"';
 const quoteBoxStyle =
   'style="margin:0;padding:0 0 0 12px;border-left:3px solid #ccc;"';
 

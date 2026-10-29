@@ -1,11 +1,16 @@
-import React from "react";
-import { Box, Typography, Avatar } from "@mui/material";
-import { getInitials, getAvatarColor } from "../_constants/avatarUtils";
-import Timestamp from "../atoms/Timestamp";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { Avatar, Box, Typography } from "@mui/material";
+import React from "react";
+import { getAvatarColor, getInitials } from "../_constants/avatarUtils";
+import Timestamp from "../atoms/Timestamp";
 
-const ThreadListItem = ({ thread, isSelected = false, onClick, onPrefetch = undefined }) => {
+const ThreadListItem = ({
+  thread,
+  isSelected = false,
+  onClick,
+  onPrefetch = undefined,
+}) => {
   const {
     id,
     subject,
@@ -57,7 +62,14 @@ const ThreadListItem = ({ thread, isSelected = false, onClick, onPrefetch = unde
       }}
     >
       {/* Avatar */}
-      <Avatar sx={{ width: 44, height: 44, fontSize: "1rem", ...getAvatarColor(participantName) }}>
+      <Avatar
+        sx={{
+          width: 44,
+          height: 44,
+          fontSize: "1rem",
+          ...getAvatarColor(participantName),
+        }}
+      >
         {getInitials(participantName)}
       </Avatar>
 
@@ -127,7 +139,14 @@ const ThreadListItem = ({ thread, isSelected = false, onClick, onPrefetch = unde
             {lastMessage}
           </Typography>
 
-          <Box sx={{ display: "flex", gap: 0.75, alignItems: "center", flexShrink: 0 }}>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 0.75,
+              alignItems: "center",
+              flexShrink: 0,
+            }}
+          >
             {isTrashed && (
               <DeleteOutlineIcon
                 titleAccess="In Trash"

@@ -1,8 +1,8 @@
-import React from "react";
-import { Box, IconButton, Button } from "@mui/material";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import SaveIcon from "@mui/icons-material/Save";
+import { Box, Button, IconButton } from "@mui/material";
+import React from "react";
 
 const ComposeActions = ({ onAttach, onSaveDraft, onDiscard }) => {
   return (

@@ -1,18 +1,18 @@
-import React from "react";
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Box,
-  useMediaQuery,
-  useTheme,
-  IconButton,
-  Avatar,
-  Tooltip,
-} from "@mui/material";
-import { useColorScheme } from "@mui/material/styles";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
+import {
+  AppBar,
+  Avatar,
+  Box,
+  IconButton,
+  Toolbar,
+  Tooltip,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+import { useColorScheme } from "@mui/material/styles";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAccount } from "../../nonview/core/AccountContext";
 import { getInitials } from "../_constants/avatarUtils";
@@ -52,7 +52,13 @@ const Header = ({
         }),
       })}
     >
-      <Toolbar sx={{ justifyContent: "space-between", minHeight: { xs: 56, md: 60 }, gap: 1 }}>
+      <Toolbar
+        sx={{
+          justifyContent: "space-between",
+          minHeight: { xs: 56, md: 60 },
+          gap: 1,
+        }}
+      >
         {/* Wordmark */}
         <Box
           sx={{
@@ -92,7 +98,9 @@ const Header = ({
 
         {/* Search Bar */}
         {showSearch && (
-          <Box sx={{ flex: 2, display: "flex", justifyContent: "center", mx: 2 }}>
+          <Box
+            sx={{ flex: 2, display: "flex", justifyContent: "center", mx: 2 }}
+          >
             <Box sx={{ width: "100%", maxWidth: 600 }}>
               <SearchBar onSearch={onSearch} placeholder="Search emails..." />
             </Box>
@@ -126,7 +134,9 @@ const Header = ({
 
           <Tooltip title={resolvedMode === "dark" ? "Light mode" : "Dark mode"}>
             <IconButton
-              onClick={() => setMode(resolvedMode === "dark" ? "light" : "dark")}
+              onClick={() =>
+                setMode(resolvedMode === "dark" ? "light" : "dark")
+              }
               aria-label="toggle color scheme"
               sx={{ color: "text.secondary" }}
             >

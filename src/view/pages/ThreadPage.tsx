@@ -1,17 +1,21 @@
+import { Alert, Box, CircularProgress, Snackbar } from "@mui/material";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Box, CircularProgress, Alert, Snackbar } from "@mui/material";
+import EmptyState from "../atoms/EmptyState";
+import ReplyBar from "../moles/ReplyBar";
 import ThreadHeader from "../moles/ThreadHeader";
 import ThreadView from "../moles/ThreadView";
-import ReplyBar from "../moles/ReplyBar";
-import EmptyState from "../atoms/EmptyState";
 
 // Reply/forward reuses the compose interface, which pulls in react-email. Keep
 // it out of the main bundle — only load it when the user opens a reply popup.
 const ComposeDialog = lazy(() => import("../moles/ComposeDialog"));
-import { useData, type ThreadMessage } from "../../nonview/core/DataContext";
+
 import { useAccount } from "../../nonview/core/AccountContext";
-import { buildReplyContext, type ReplyMode } from "../../nonview/core/replyContext";
+import { type ThreadMessage, useData } from "../../nonview/core/DataContext";
+import {
+  buildReplyContext,
+  type ReplyMode,
+} from "../../nonview/core/replyContext";
 import { plainTextToHtml } from "../../nonview/email/plainText";
 
 function ThreadPage() {
@@ -76,7 +80,12 @@ function ThreadPage() {
 
   const replyCtx = useMemo(() => {
     if (!replyMode || !thread) return null;
-    const ctx = buildReplyContext(replyMode, thread, messages, activeAccount?.email);
+    const ctx = buildReplyContext(
+      replyMode,
+      thread,
+      messages,
+      activeAccount?.email,
+    );
     // Carry over whatever the user already typed inline into the popup.
     if (replyMode === "reply" && draftText.trim()) {
       return { ...ctx, initial: { ...ctx.initial, body: draftText } };
@@ -106,7 +115,12 @@ function ThreadPage() {
   // without opening the compose popup.
   const handleQuickSend = async () => {
     if (!thread || !draftText.trim() || sending) return;
-    const ctx = buildReplyContext("reply", thread, messages, activeAccount?.email);
+    const ctx = buildReplyContext(
+      "reply",
+      thread,
+      messages,
+      activeAccount?.email,
+    );
     const text = draftText.trim();
     const html = plainTextToHtml(text);
     setSending(true);
@@ -175,13 +189,14 @@ function ThreadPage() {
     if (!threadId || !thread || thread.unreadCount === 0) return;
     // The user just marked a message unread on purpose; leave it that way.
     if (suppressAutoRead.current) return;
-    markAsRead(threadId).catch((e) =>
-      console.warn("markAsRead failed", e),
-    );
+    markAsRead(threadId).catch((e) => console.warn("markAsRead failed", e));
   }, [threadId, thread, markAsRead]);
 
   // Per-message actions from the bubble's kebab / right-click menu (issue #40).
-  const handleMessageAction = async (action: string, message: ThreadMessage) => {
+  const handleMessageAction = async (
+    action: string,
+    message: ThreadMessage,
+  ) => {
     const srcId = message.sourceThreadId;
     setActionError(null);
     try {
@@ -225,7 +240,9 @@ function ThreadPage() {
           if (!srcId) return;
           await deleteThread(srcId);
           setMessages((prev) =>
-            prev.map((m) => (m.id === message.id ? { ...m, deleted: true } : m)),
+            prev.map((m) =>
+              m.id === message.id ? { ...m, deleted: true } : m,
+            ),
           );
           setDeletedMessages((prev) =>
             prev.some((m) => m.id === message.id)
@@ -242,17 +259,25 @@ function ThreadPage() {
           // path. Unmark the in-memory copy for instant feedback.
           setDeletedMessages((prev) => prev.filter((m) => m.id !== message.id));
           setMessages((prev) =>
-            prev.map((m) => (m.id === message.id ? { ...m, deleted: false } : m)),
+            prev.map((m) =>
+              m.id === message.id ? { ...m, deleted: false } : m,
+            ),
           );
           setToast("Message restored to Inbox");
           break;
         }
         case "deletePermanent": {
-          if (!window.confirm("Permanently delete this message? This cannot be undone.")) {
+          if (
+            !window.confirm(
+              "Permanently delete this message? This cannot be undone.",
+            )
+          ) {
             return;
           }
           await deleteMessagePermanently(message.id);
-          const remainingDeleted = deletedMessages.filter((m) => m.id !== message.id);
+          const remainingDeleted = deletedMessages.filter(
+            (m) => m.id !== message.id,
+          );
           const remainingFetched = messages.filter((m) => m.id !== message.id);
           setDeletedMessages(remainingDeleted);
           setMessages(remainingFetched);
@@ -278,7 +303,8 @@ function ThreadPage() {
       ...messages,
       ...deletedMessages.filter((m) => !fetchedIds.has(m.id)),
     ].sort(
-      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+      (a, b) =>
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
     );
   }, [messages, deletedMessages]);
 
@@ -324,12 +350,20 @@ function ThreadPage() {
           </Alert>
         )}
         {sendError && (
-          <Alert severity="error" sx={{ m: 2 }} onClose={() => setSendError(null)}>
+          <Alert
+            severity="error"
+            sx={{ m: 2 }}
+            onClose={() => setSendError(null)}
+          >
             {sendError}
           </Alert>
         )}
         {actionError && (
-          <Alert severity="error" sx={{ m: 2 }} onClose={() => setActionError(null)}>
+          <Alert
+            severity="error"
+            sx={{ m: 2 }}
+            onClose={() => setActionError(null)}
+          >
             {actionError}
           </Alert>
         )}
@@ -338,7 +372,11 @@ function ThreadPage() {
           messages={displayMessages}
           loading={messagesLoading}
           onDownloadAttachment={(sourceThreadId, attachmentId, filename) =>
-            downloadAttachment(sourceThreadId || threadId, attachmentId, filename)
+            downloadAttachment(
+              sourceThreadId || threadId,
+              attachmentId,
+              filename,
+            )
           }
           onFetchAttachment={(sourceThreadId, attachmentId) =>
             fetchAttachment(sourceThreadId || threadId, attachmentId)

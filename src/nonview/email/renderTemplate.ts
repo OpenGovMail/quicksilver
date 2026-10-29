@@ -6,8 +6,8 @@
 // `render` resolves the browser build under Vite, so this runs entirely in the
 // client with no server round-trip.
 
-import React from "react";
 import { render } from "@react-email/render";
+import React from "react";
 import { getTemplate, type TemplateValues } from "./templates";
 
 export interface RenderedEmail {

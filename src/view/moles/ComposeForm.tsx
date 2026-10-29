@@ -1,12 +1,12 @@
-import React, { useRef } from "react";
-import { Box, TextField, ToggleButton, ToggleButtonGroup } from "@mui/material";
-import NotesIcon from "@mui/icons-material/Notes";
 import DashboardCustomizeOutlinedIcon from "@mui/icons-material/DashboardCustomizeOutlined";
-import RecipientInput from "./RecipientInput";
-import ComposeActions from "./ComposeActions";
-import TemplateGallery from "./TemplateGallery";
-import TemplateEditor from "./TemplateEditor";
+import NotesIcon from "@mui/icons-material/Notes";
+import { Box, TextField, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import React, { useRef } from "react";
 import { getTemplate } from "../../nonview/email/templates";
+import ComposeActions from "./ComposeActions";
+import RecipientInput from "./RecipientInput";
+import TemplateEditor from "./TemplateEditor";
+import TemplateGallery from "./TemplateGallery";
 
 const ComposeForm = ({
   recipients,
@@ -95,7 +95,10 @@ const ComposeForm = ({
               onChangeTemplate={onChangeTemplate}
             />
           ) : (
-            <TemplateGallery onSelect={onTemplateSelect} selectedId={templateId} />
+            <TemplateGallery
+              onSelect={onTemplateSelect}
+              selectedId={templateId}
+            />
           )}
         </Box>
       ) : (

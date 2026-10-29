@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import CloseIcon from "@mui/icons-material/Close";
+import SendIcon from "@mui/icons-material/Send";
 import {
   Alert,
   Box,
@@ -8,19 +9,26 @@ import {
   Snackbar,
   Typography,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import SendIcon from "@mui/icons-material/Send";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const ComposeHeader = ({ onClose, onSend, title = "New Message", sendLabel = "Send" }) => {
+const ComposeHeader = ({
+  onClose,
+  onSend,
+  title = "New Message",
+  sendLabel = "Send",
+}) => {
   const navigate = useNavigate();
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Avoid a state update after the page navigates away on a successful send.
   const mounted = useRef(true);
-  useEffect(() => () => {
-    mounted.current = false;
-  }, []);
+  useEffect(
+    () => () => {
+      mounted.current = false;
+    },
+    [],
+  );
 
   const handleClose = () => {
     if (onClose) {
@@ -39,7 +47,11 @@ const ComposeHeader = ({ onClose, onSend, title = "New Message", sendLabel = "Se
       // On success onSend navigates away; component unmounts, nothing to reset.
     } catch (e) {
       if (mounted.current) {
-        setError(e instanceof Error ? e.message : "Couldn't send the message. Please try again.");
+        setError(
+          e instanceof Error
+            ? e.message
+            : "Couldn't send the message. Please try again.",
+        );
         setSending(false);
       }
     }

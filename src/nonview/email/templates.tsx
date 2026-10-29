@@ -9,10 +9,10 @@
 // To add a template: append an entry to TEMPLATES with a unique id, a field
 // list, an optional subject() helper, and a Component that reads `values`.
 
-import React from "react";
 import {
   Body,
   Button,
+  Column,
   Container,
   Head,
   Heading,
@@ -23,10 +23,10 @@ import {
   Markdown,
   Preview,
   Row,
-  Column,
   Section,
   Text,
 } from "@react-email/components";
+import type React from "react";
 
 // Quicksilver brand palette (mirrors src/theme.ts).
 const BRAND = {
@@ -156,7 +156,9 @@ const paragraphs = (v?: string): string[] =>
     .filter(Boolean);
 
 // A tinted brand bar used as a header accent on several templates.
-const AccentBar: React.FC<{ color?: string }> = ({ color = BRAND.burgundy }) => (
+const AccentBar: React.FC<{ color?: string }> = ({
+  color = BRAND.burgundy,
+}) => (
   <div
     style={{
       height: "6px",
@@ -170,8 +172,12 @@ const BrandFooter: React.FC<{ company: string; footerNote?: string }> = ({
   footerNote,
 }) => (
   <Section style={footer}>
-    <Text style={{ ...muted, margin: "0 0 4px", fontWeight: 600 }}>{company}</Text>
-    {footerNote ? <Text style={{ ...muted, margin: 0 }}>{footerNote}</Text> : null}
+    <Text style={{ ...muted, margin: "0 0 4px", fontWeight: 600 }}>
+      {company}
+    </Text>
+    {footerNote ? (
+      <Text style={{ ...muted, margin: 0 }}>{footerNote}</Text>
+    ) : null}
     <Text style={{ ...muted, margin: "8px 0 0" }}>
       Sent with Quicksilver · Email 2.0
     </Text>
@@ -187,17 +193,23 @@ const SimpleTemplate: React.FC<{ values: TemplateValues }> = ({ values }) => (
     <Head />
     <Preview>{values.preheader || values.heading || "New message"}</Preview>
     <Body style={main}>
-      <Container style={{ ...container, marginTop: "24px", marginBottom: "24px" }}>
+      <Container
+        style={{ ...container, marginTop: "24px", marginBottom: "24px" }}
+      >
         <AccentBar />
         <Section style={contentPad}>
-          {values.heading ? <Heading style={h1}>{values.heading}</Heading> : null}
+          {values.heading ? (
+            <Heading style={h1}>{values.heading}</Heading>
+          ) : null}
           {paragraphs(values.body).map((p, i) => (
             <Text key={i} style={paragraph}>
               {p}
             </Text>
           ))}
           {values.signoff ? (
-            <Text style={{ ...paragraph, marginTop: "24px" }}>{values.signoff}</Text>
+            <Text style={{ ...paragraph, marginTop: "24px" }}>
+              {values.signoff}
+            </Text>
           ) : null}
         </Section>
       </Container>
@@ -210,7 +222,9 @@ const CTATemplate: React.FC<{ values: TemplateValues }> = ({ values }) => (
     <Head />
     <Preview>{values.preheader || values.heading}</Preview>
     <Body style={main}>
-      <Container style={{ ...container, marginTop: "24px", marginBottom: "24px" }}>
+      <Container
+        style={{ ...container, marginTop: "24px", marginBottom: "24px" }}
+      >
         <AccentBar />
         <Section style={contentPad}>
           {values.eyebrow ? (
@@ -241,21 +255,30 @@ const CTATemplate: React.FC<{ values: TemplateValues }> = ({ values }) => (
             </Section>
           ) : null}
           {values.footnote ? (
-            <Text style={{ ...muted, marginTop: "16px" }}>{values.footnote}</Text>
+            <Text style={{ ...muted, marginTop: "16px" }}>
+              {values.footnote}
+            </Text>
           ) : null}
         </Section>
-        <BrandFooter company={values.company || "Quicksilver"} footerNote={values.address} />
+        <BrandFooter
+          company={values.company || "Quicksilver"}
+          footerNote={values.address}
+        />
       </Container>
     </Body>
   </Html>
 );
 
-const NewsletterTemplate: React.FC<{ values: TemplateValues }> = ({ values }) => (
+const NewsletterTemplate: React.FC<{ values: TemplateValues }> = ({
+  values,
+}) => (
   <Html>
     <Head />
     <Preview>{values.preheader || values.title}</Preview>
     <Body style={main}>
-      <Container style={{ ...container, marginTop: "24px", marginBottom: "24px" }}>
+      <Container
+        style={{ ...container, marginTop: "24px", marginBottom: "24px" }}
+      >
         <Section
           style={{
             padding: "36px 40px 20px",
@@ -296,7 +319,9 @@ const NewsletterTemplate: React.FC<{ values: TemplateValues }> = ({ values }) =>
                 >
                   {head.trim()}
                 </Heading>
-                {bodyText ? <Text style={{ ...paragraph, margin: 0 }}>{bodyText}</Text> : null}
+                {bodyText ? (
+                  <Text style={{ ...paragraph, margin: 0 }}>{bodyText}</Text>
+                ) : null}
               </Section>
             );
           })}
@@ -308,18 +333,25 @@ const NewsletterTemplate: React.FC<{ values: TemplateValues }> = ({ values }) =>
             </Section>
           ) : null}
         </Section>
-        <BrandFooter company={values.company || "Quicksilver"} footerNote={values.address} />
+        <BrandFooter
+          company={values.company || "Quicksilver"}
+          footerNote={values.address}
+        />
       </Container>
     </Body>
   </Html>
 );
 
-const AnnouncementTemplate: React.FC<{ values: TemplateValues }> = ({ values }) => (
+const AnnouncementTemplate: React.FC<{ values: TemplateValues }> = ({
+  values,
+}) => (
   <Html>
     <Head />
     <Preview>{values.preheader || values.heading}</Preview>
     <Body style={main}>
-      <Container style={{ ...container, marginTop: "24px", marginBottom: "24px" }}>
+      <Container
+        style={{ ...container, marginTop: "24px", marginBottom: "24px" }}
+      >
         <AccentBar color={BRAND.teal} />
         <Section style={{ ...contentPad, textAlign: "center" }}>
           <Text
@@ -338,7 +370,9 @@ const AnnouncementTemplate: React.FC<{ values: TemplateValues }> = ({ values }) 
           >
             {values.badge || "Announcement"}
           </Text>
-          <Heading style={{ ...h1, textAlign: "center" }}>{values.heading}</Heading>
+          <Heading style={{ ...h1, textAlign: "center" }}>
+            {values.heading}
+          </Heading>
           {paragraphs(values.body).map((p, i) => (
             <Text key={i} style={{ ...paragraph, textAlign: "center" }}>
               {p}
@@ -352,7 +386,10 @@ const AnnouncementTemplate: React.FC<{ values: TemplateValues }> = ({ values }) 
             </Section>
           ) : null}
         </Section>
-        <BrandFooter company={values.company || "Quicksilver"} footerNote={values.address} />
+        <BrandFooter
+          company={values.company || "Quicksilver"}
+          footerNote={values.address}
+        />
       </Container>
     </Body>
   </Html>
@@ -366,7 +403,9 @@ const MeetingTemplate: React.FC<{ values: TemplateValues }> = ({ values }) => {
           <Text style={{ ...muted, margin: 0, fontWeight: 700 }}>{label}</Text>
         </Column>
         <Column>
-          <Text style={{ ...paragraph, margin: 0, fontSize: "15px" }}>{value}</Text>
+          <Text style={{ ...paragraph, margin: 0, fontSize: "15px" }}>
+            {value}
+          </Text>
         </Column>
       </Row>
     ) : null;
@@ -376,7 +415,9 @@ const MeetingTemplate: React.FC<{ values: TemplateValues }> = ({ values }) => {
       <Head />
       <Preview>{values.preheader || `Invitation: ${values.title}`}</Preview>
       <Body style={main}>
-        <Container style={{ ...container, marginTop: "24px", marginBottom: "24px" }}>
+        <Container
+          style={{ ...container, marginTop: "24px", marginBottom: "24px" }}
+        >
           <AccentBar />
           <Section style={contentPad}>
             <Text
@@ -392,7 +433,9 @@ const MeetingTemplate: React.FC<{ values: TemplateValues }> = ({ values }) => {
               Meeting invitation
             </Text>
             <Heading style={h1}>{values.title}</Heading>
-            {values.description ? <Text style={paragraph}>{values.description}</Text> : null}
+            {values.description ? (
+              <Text style={paragraph}>{values.description}</Text>
+            ) : null}
             <Section
               style={{
                 backgroundColor: BRAND.bg,
@@ -414,7 +457,10 @@ const MeetingTemplate: React.FC<{ values: TemplateValues }> = ({ values }) => {
               </Section>
             ) : null}
           </Section>
-          <BrandFooter company={values.company || "Quicksilver"} footerNote={values.address} />
+          <BrandFooter
+            company={values.company || "Quicksilver"}
+            footerNote={values.address}
+          />
         </Container>
       </Body>
     </Html>
@@ -431,11 +477,17 @@ const ReceiptTemplate: React.FC<{ values: TemplateValues }> = ({ values }) => {
       <Head />
       <Preview>{values.preheader || `Receipt ${values.orderId || ""}`}</Preview>
       <Body style={main}>
-        <Container style={{ ...container, marginTop: "24px", marginBottom: "24px" }}>
+        <Container
+          style={{ ...container, marginTop: "24px", marginBottom: "24px" }}
+        >
           <AccentBar color={BRAND.teal} />
           <Section style={contentPad}>
-            <Heading style={h1}>{values.heading || "Thanks for your order"}</Heading>
-            {values.intro ? <Text style={paragraph}>{values.intro}</Text> : null}
+            <Heading style={h1}>
+              {values.heading || "Thanks for your order"}
+            </Heading>
+            {values.intro ? (
+              <Text style={paragraph}>{values.intro}</Text>
+            ) : null}
             {values.orderId ? (
               <Text style={{ ...muted, margin: "0 0 16px" }}>
                 Order {values.orderId}
@@ -458,19 +510,32 @@ const ReceiptTemplate: React.FC<{ values: TemplateValues }> = ({ values }) => {
                   }}
                 >
                   <Column>
-                    <Text style={{ ...paragraph, margin: 0, fontSize: "15px" }}>{it.name}</Text>
+                    <Text style={{ ...paragraph, margin: 0, fontSize: "15px" }}>
+                      {it.name}
+                    </Text>
                   </Column>
                   <Column style={{ textAlign: "right", whiteSpace: "nowrap" }}>
-                    <Text style={{ ...paragraph, margin: 0, fontSize: "15px", fontWeight: 600 }}>
+                    <Text
+                      style={{
+                        ...paragraph,
+                        margin: 0,
+                        fontSize: "15px",
+                        fontWeight: 600,
+                      }}
+                    >
                       {it.price}
                     </Text>
                   </Column>
                 </Row>
               ))}
               {values.total ? (
-                <Row style={{ padding: "14px 18px", backgroundColor: BRAND.bg }}>
+                <Row
+                  style={{ padding: "14px 18px", backgroundColor: BRAND.bg }}
+                >
                   <Column>
-                    <Text style={{ ...paragraph, margin: 0, fontWeight: 700 }}>Total</Text>
+                    <Text style={{ ...paragraph, margin: 0, fontWeight: 700 }}>
+                      Total
+                    </Text>
                   </Column>
                   <Column style={{ textAlign: "right" }}>
                     <Text
@@ -495,7 +560,10 @@ const ReceiptTemplate: React.FC<{ values: TemplateValues }> = ({ values }) => {
               </Section>
             ) : null}
           </Section>
-          <BrandFooter company={values.company || "Quicksilver"} footerNote={values.address} />
+          <BrandFooter
+            company={values.company || "Quicksilver"}
+            footerNote={values.address}
+          />
         </Container>
       </Body>
     </Html>
@@ -506,8 +574,18 @@ const ReceiptTemplate: React.FC<{ values: TemplateValues }> = ({ values }) => {
 // Quicksilver look (headings, links, code, quotes) as inline email styles.
 const markdownStyles = {
   h1: { ...h1, fontSize: "24px" },
-  h2: { color: BRAND.ink, fontSize: "20px", fontWeight: 700, margin: "24px 0 10px" },
-  h3: { color: BRAND.ink, fontSize: "17px", fontWeight: 700, margin: "20px 0 8px" },
+  h2: {
+    color: BRAND.ink,
+    fontSize: "20px",
+    fontWeight: 700,
+    margin: "24px 0 10px",
+  },
+  h3: {
+    color: BRAND.ink,
+    fontSize: "17px",
+    fontWeight: 700,
+    margin: "20px 0 8px",
+  },
   p: paragraph,
   link: { color: BRAND.burgundy, textDecoration: "underline" },
   li: { ...paragraph, margin: "0 0 6px" },
@@ -536,7 +614,11 @@ const markdownStyles = {
     fontFamily: "monospace",
     overflowX: "auto" as const,
   },
-  hr: { border: "none", borderTop: `1px solid ${BRAND.border}`, margin: "24px 0" },
+  hr: {
+    border: "none",
+    borderTop: `1px solid ${BRAND.border}`,
+    margin: "24px 0",
+  },
 };
 
 const MarkdownTemplate: React.FC<{ values: TemplateValues }> = ({ values }) => (
@@ -544,10 +626,14 @@ const MarkdownTemplate: React.FC<{ values: TemplateValues }> = ({ values }) => (
     <Head />
     <Preview>{values.preheader || values.heading || "New message"}</Preview>
     <Body style={main}>
-      <Container style={{ ...container, marginTop: "24px", marginBottom: "24px" }}>
+      <Container
+        style={{ ...container, marginTop: "24px", marginBottom: "24px" }}
+      >
         <AccentBar />
         <Section style={contentPad}>
-          {values.heading ? <Heading style={h1}>{values.heading}</Heading> : null}
+          {values.heading ? (
+            <Heading style={h1}>{values.heading}</Heading>
+          ) : null}
           <Markdown
             markdownContainerStyles={{ padding: 0 }}
             markdownCustomStyles={markdownStyles}
@@ -568,14 +654,18 @@ const OtpTemplate: React.FC<{ values: TemplateValues }> = ({ values }) => (
     <Head />
     <Preview>{values.preheader || "Your verification code"}</Preview>
     <Body style={main}>
-      <Container style={{ ...container, marginTop: "24px", marginBottom: "24px" }}>
+      <Container
+        style={{ ...container, marginTop: "24px", marginBottom: "24px" }}
+      >
         <AccentBar color={BRAND.teal} />
         <Section style={{ ...contentPad, textAlign: "center" }}>
           <Heading style={{ ...h1, textAlign: "center" }}>
             {values.heading || "Your verification code"}
           </Heading>
           {values.intro ? (
-            <Text style={{ ...paragraph, textAlign: "center" }}>{values.intro}</Text>
+            <Text style={{ ...paragraph, textAlign: "center" }}>
+              {values.intro}
+            </Text>
           ) : null}
           <Section
             style={{
@@ -600,7 +690,9 @@ const OtpTemplate: React.FC<{ values: TemplateValues }> = ({ values }) => (
             </Text>
           </Section>
           {values.expiry ? (
-            <Text style={{ ...muted, textAlign: "center" }}>{values.expiry}</Text>
+            <Text style={{ ...muted, textAlign: "center" }}>
+              {values.expiry}
+            </Text>
           ) : null}
           {values.footnote ? (
             <Text style={{ ...muted, textAlign: "center", marginTop: "8px" }}>
@@ -608,21 +700,30 @@ const OtpTemplate: React.FC<{ values: TemplateValues }> = ({ values }) => (
             </Text>
           ) : null}
         </Section>
-        <BrandFooter company={values.company || "Quicksilver"} footerNote={values.address} />
+        <BrandFooter
+          company={values.company || "Quicksilver"}
+          footerNote={values.address}
+        />
       </Container>
     </Body>
   </Html>
 );
 
-const PasswordResetTemplate: React.FC<{ values: TemplateValues }> = ({ values }) => (
+const PasswordResetTemplate: React.FC<{ values: TemplateValues }> = ({
+  values,
+}) => (
   <Html>
     <Head />
     <Preview>{values.preheader || values.heading}</Preview>
     <Body style={main}>
-      <Container style={{ ...container, marginTop: "24px", marginBottom: "24px" }}>
+      <Container
+        style={{ ...container, marginTop: "24px", marginBottom: "24px" }}
+      >
         <AccentBar color={BRAND.teal} />
         <Section style={contentPad}>
-          <Heading style={h1}>{values.heading || "Reset your password"}</Heading>
+          <Heading style={h1}>
+            {values.heading || "Reset your password"}
+          </Heading>
           {paragraphs(values.body).map((p, i) => (
             <Text key={i} style={paragraph}>
               {p}
@@ -638,13 +739,22 @@ const PasswordResetTemplate: React.FC<{ values: TemplateValues }> = ({ values })
           {values.expiry ? (
             <Text style={{ ...muted, marginTop: "8px" }}>{values.expiry}</Text>
           ) : null}
-          <Hr style={{ border: "none", borderTop: `1px solid ${BRAND.border}`, margin: "20px 0" }} />
+          <Hr
+            style={{
+              border: "none",
+              borderTop: `1px solid ${BRAND.border}`,
+              margin: "20px 0",
+            }}
+          />
           <Text style={muted}>
             {values.footnote ||
               "If you didn't request this, you can safely ignore this email — your password won't change."}
           </Text>
         </Section>
-        <BrandFooter company={values.company || "Quicksilver"} footerNote={values.address} />
+        <BrandFooter
+          company={values.company || "Quicksilver"}
+          footerNote={values.address}
+        />
       </Container>
     </Body>
   </Html>
@@ -655,7 +765,9 @@ const FeedbackTemplate: React.FC<{ values: TemplateValues }> = ({ values }) => (
     <Head />
     <Preview>{values.preheader || values.heading}</Preview>
     <Body style={main}>
-      <Container style={{ ...container, marginTop: "24px", marginBottom: "24px" }}>
+      <Container
+        style={{ ...container, marginTop: "24px", marginBottom: "24px" }}
+      >
         <AccentBar color={BRAND.orange} />
         <Section style={{ ...contentPad, textAlign: "center" }}>
           <Heading style={{ ...h1, textAlign: "center" }}>
@@ -666,7 +778,13 @@ const FeedbackTemplate: React.FC<{ values: TemplateValues }> = ({ values }) => (
               {p}
             </Text>
           ))}
-          <Text style={{ fontSize: "30px", letterSpacing: "0.15em", margin: "8px 0 16px" }}>
+          <Text
+            style={{
+              fontSize: "30px",
+              letterSpacing: "0.15em",
+              margin: "8px 0 16px",
+            }}
+          >
             ⭐⭐⭐⭐⭐
           </Text>
           {values.buttonText && values.buttonUrl ? (
@@ -682,7 +800,10 @@ const FeedbackTemplate: React.FC<{ values: TemplateValues }> = ({ values }) => (
             </Text>
           ) : null}
         </Section>
-        <BrandFooter company={values.company || "Quicksilver"} footerNote={values.address} />
+        <BrandFooter
+          company={values.company || "Quicksilver"}
+          footerNote={values.address}
+        />
       </Container>
     </Body>
   </Html>
@@ -696,13 +817,19 @@ export const TEMPLATES: EmailTemplate[] = [
   {
     id: "markdown",
     name: "Markdown",
-    description: "Write in Markdown — headings, lists, links, quotes and code render automatically.",
+    description:
+      "Write in Markdown — headings, lists, links, quotes and code render automatically.",
     icon: "📝",
     category: "Basic",
     Component: MarkdownTemplate,
     subject: (v) => v.heading || "",
     fields: [
-      { key: "heading", label: "Heading (optional)", type: "text", default: "" },
+      {
+        key: "heading",
+        label: "Heading (optional)",
+        type: "text",
+        default: "",
+      },
       {
         key: "markdown",
         label: "Markdown",
@@ -711,7 +838,12 @@ export const TEMPLATES: EmailTemplate[] = [
           "# Hello there\n\nThanks for reaching out. Here's what I wanted to share:\n\n- **Bold** and _italic_ text work\n- [Links](https://example.com) are styled\n- Lists, quotes and code too\n\n> A short quote to make a point.\n\nInline `code` and blocks:\n\n```\nnpm install quicksilver\n```\n\nBest regards,",
         help: "Standard Markdown: # headings, **bold**, - lists, > quotes, `code`, [links](url).",
       },
-      { key: "company", label: "Footer name (optional)", type: "text", default: "" },
+      {
+        key: "company",
+        label: "Footer name (optional)",
+        type: "text",
+        default: "",
+      },
       { key: "address", label: "Footer address", type: "text", default: "" },
       { key: "preheader", label: "Preview text", type: "text", default: "" },
     ],
@@ -719,13 +851,19 @@ export const TEMPLATES: EmailTemplate[] = [
   {
     id: "simple",
     name: "Simple message",
-    description: "A clean, branded letter — heading, body paragraphs, and a sign-off.",
+    description:
+      "A clean, branded letter — heading, body paragraphs, and a sign-off.",
     icon: "✉️",
     category: "Basic",
     Component: SimpleTemplate,
     subject: (v) => v.heading || "",
     fields: [
-      { key: "heading", label: "Heading", type: "text", default: "Hello there" },
+      {
+        key: "heading",
+        label: "Heading",
+        type: "text",
+        default: "Hello there",
+      },
       {
         key: "body",
         label: "Body",
@@ -734,21 +872,37 @@ export const TEMPLATES: EmailTemplate[] = [
           "Thanks for reaching out.\n\nI wanted to follow up on our conversation and share a few next steps with you.",
         help: "Separate paragraphs with a blank line.",
       },
-      { key: "signoff", label: "Sign-off", type: "text", default: "Best regards," },
+      {
+        key: "signoff",
+        label: "Sign-off",
+        type: "text",
+        default: "Best regards,",
+      },
       { key: "preheader", label: "Preview text", type: "text", default: "" },
     ],
   },
   {
     id: "welcome",
     name: "Welcome / CTA",
-    description: "Onboarding-style email with an eyebrow, message, and a call-to-action button.",
+    description:
+      "Onboarding-style email with an eyebrow, message, and a call-to-action button.",
     icon: "👋",
     category: "Marketing",
     Component: CTATemplate,
     subject: (v) => v.heading || "Welcome",
     fields: [
-      { key: "eyebrow", label: "Eyebrow", type: "text", default: "Welcome aboard" },
-      { key: "heading", label: "Heading", type: "text", default: "Great to have you here" },
+      {
+        key: "eyebrow",
+        label: "Eyebrow",
+        type: "text",
+        default: "Welcome aboard",
+      },
+      {
+        key: "heading",
+        label: "Heading",
+        type: "text",
+        default: "Great to have you here",
+      },
       {
         key: "body",
         label: "Body",
@@ -756,10 +910,25 @@ export const TEMPLATES: EmailTemplate[] = [
         default:
           "We're thrilled you've joined us. Get started by exploring your dashboard and setting up your profile.\n\nIf you have any questions, just reply to this email.",
       },
-      { key: "buttonText", label: "Button text", type: "text", default: "Get started" },
-      { key: "buttonUrl", label: "Button link", type: "url", default: "https://example.com" },
+      {
+        key: "buttonText",
+        label: "Button text",
+        type: "text",
+        default: "Get started",
+      },
+      {
+        key: "buttonUrl",
+        label: "Button link",
+        type: "url",
+        default: "https://example.com",
+      },
       { key: "footnote", label: "Footnote", type: "text", default: "" },
-      { key: "company", label: "Company name", type: "text", default: "Quicksilver" },
+      {
+        key: "company",
+        label: "Company name",
+        type: "text",
+        default: "Quicksilver",
+      },
       { key: "address", label: "Footer address", type: "text", default: "" },
       { key: "preheader", label: "Preview text", type: "text", default: "" },
     ],
@@ -767,14 +936,25 @@ export const TEMPLATES: EmailTemplate[] = [
   {
     id: "newsletter",
     name: "Newsletter",
-    description: "Multi-section newsletter with a gradient header and article blocks.",
+    description:
+      "Multi-section newsletter with a gradient header and article blocks.",
     icon: "📰",
     category: "Marketing",
     Component: NewsletterTemplate,
     subject: (v) => v.title || "Newsletter",
     fields: [
-      { key: "issue", label: "Issue label", type: "text", default: "Issue #1 · This week" },
-      { key: "title", label: "Title", type: "text", default: "What's new at Quicksilver" },
+      {
+        key: "issue",
+        label: "Issue label",
+        type: "text",
+        default: "Issue #1 · This week",
+      },
+      {
+        key: "title",
+        label: "Title",
+        type: "text",
+        default: "What's new at Quicksilver",
+      },
       {
         key: "intro",
         label: "Intro",
@@ -789,9 +969,24 @@ export const TEMPLATES: EmailTemplate[] = [
           "New feature launched | We shipped rich HTML composing with react-email.\nCommunity spotlight | See what people built this month.\nUpcoming events | Join our webinar next Thursday.",
         help: "One section per line, in the form: Heading | Body text",
       },
-      { key: "buttonText", label: "Button text", type: "text", default: "Read more" },
-      { key: "buttonUrl", label: "Button link", type: "url", default: "https://example.com" },
-      { key: "company", label: "Company name", type: "text", default: "Quicksilver" },
+      {
+        key: "buttonText",
+        label: "Button text",
+        type: "text",
+        default: "Read more",
+      },
+      {
+        key: "buttonUrl",
+        label: "Button link",
+        type: "url",
+        default: "https://example.com",
+      },
+      {
+        key: "company",
+        label: "Company name",
+        type: "text",
+        default: "Quicksilver",
+      },
       { key: "address", label: "Footer address", type: "text", default: "" },
       { key: "preheader", label: "Preview text", type: "text", default: "" },
     ],
@@ -806,16 +1001,37 @@ export const TEMPLATES: EmailTemplate[] = [
     subject: (v) => v.heading || "Announcement",
     fields: [
       { key: "badge", label: "Badge", type: "text", default: "New" },
-      { key: "heading", label: "Heading", type: "text", default: "We just launched something big" },
+      {
+        key: "heading",
+        label: "Heading",
+        type: "text",
+        default: "We just launched something big",
+      },
       {
         key: "body",
         label: "Body",
         type: "textarea",
-        default: "We've been working hard on this and can't wait for you to try it.",
+        default:
+          "We've been working hard on this and can't wait for you to try it.",
       },
-      { key: "buttonText", label: "Button text", type: "text", default: "See what's new" },
-      { key: "buttonUrl", label: "Button link", type: "url", default: "https://example.com" },
-      { key: "company", label: "Company name", type: "text", default: "Quicksilver" },
+      {
+        key: "buttonText",
+        label: "Button text",
+        type: "text",
+        default: "See what's new",
+      },
+      {
+        key: "buttonUrl",
+        label: "Button link",
+        type: "url",
+        default: "https://example.com",
+      },
+      {
+        key: "company",
+        label: "Company name",
+        type: "text",
+        default: "Quicksilver",
+      },
       { key: "address", label: "Footer address", type: "text", default: "" },
       { key: "preheader", label: "Preview text", type: "text", default: "" },
     ],
@@ -823,26 +1039,62 @@ export const TEMPLATES: EmailTemplate[] = [
   {
     id: "meeting",
     name: "Meeting invite",
-    description: "Invitation with structured date/time/location details and a join button.",
+    description:
+      "Invitation with structured date/time/location details and a join button.",
     icon: "📅",
     category: "Productivity",
     Component: MeetingTemplate,
     subject: (v) => (v.title ? `Invitation: ${v.title}` : "Meeting invitation"),
     fields: [
-      { key: "title", label: "Meeting title", type: "text", default: "Product sync" },
+      {
+        key: "title",
+        label: "Meeting title",
+        type: "text",
+        default: "Product sync",
+      },
       {
         key: "description",
         label: "Description",
         type: "textarea",
         default: "Let's align on the roadmap and review open questions.",
       },
-      { key: "date", label: "Date", type: "text", default: "Monday, 14 July 2026" },
-      { key: "time", label: "Time", type: "text", default: "10:00 – 10:30 (GMT+5:30)" },
-      { key: "location", label: "Location", type: "text", default: "Google Meet" },
+      {
+        key: "date",
+        label: "Date",
+        type: "text",
+        default: "Monday, 14 July 2026",
+      },
+      {
+        key: "time",
+        label: "Time",
+        type: "text",
+        default: "10:00 – 10:30 (GMT+5:30)",
+      },
+      {
+        key: "location",
+        label: "Location",
+        type: "text",
+        default: "Google Meet",
+      },
       { key: "host", label: "Host", type: "text", default: "" },
-      { key: "joinUrl", label: "Join link", type: "url", default: "https://meet.example.com/abc" },
-      { key: "buttonText", label: "Button text", type: "text", default: "Join meeting" },
-      { key: "company", label: "Company name", type: "text", default: "Quicksilver" },
+      {
+        key: "joinUrl",
+        label: "Join link",
+        type: "url",
+        default: "https://meet.example.com/abc",
+      },
+      {
+        key: "buttonText",
+        label: "Button text",
+        type: "text",
+        default: "Join meeting",
+      },
+      {
+        key: "company",
+        label: "Company name",
+        type: "text",
+        default: "Quicksilver",
+      },
       { key: "preheader", label: "Preview text", type: "text", default: "" },
     ],
   },
@@ -853,9 +1105,15 @@ export const TEMPLATES: EmailTemplate[] = [
     icon: "🧾",
     category: "Transactional",
     Component: ReceiptTemplate,
-    subject: (v) => (v.orderId ? `Receipt for order ${v.orderId}` : "Your receipt"),
+    subject: (v) =>
+      v.orderId ? `Receipt for order ${v.orderId}` : "Your receipt",
     fields: [
-      { key: "heading", label: "Heading", type: "text", default: "Thanks for your order" },
+      {
+        key: "heading",
+        label: "Heading",
+        type: "text",
+        default: "Thanks for your order",
+      },
       {
         key: "intro",
         label: "Intro",
@@ -863,18 +1121,39 @@ export const TEMPLATES: EmailTemplate[] = [
         default: "Your order is confirmed. Here's a summary of your purchase.",
       },
       { key: "orderId", label: "Order ID", type: "text", default: "QS-10234" },
-      { key: "orderDate", label: "Order date", type: "text", default: "6 July 2026" },
+      {
+        key: "orderDate",
+        label: "Order date",
+        type: "text",
+        default: "6 July 2026",
+      },
       {
         key: "items",
         label: "Line items",
         type: "list",
-        default: "Pro subscription (annual) | $120.00\nPriority support | $30.00",
+        default:
+          "Pro subscription (annual) | $120.00\nPriority support | $30.00",
         help: "One item per line, in the form: Item name | Price",
       },
       { key: "total", label: "Total", type: "text", default: "$150.00" },
-      { key: "buttonText", label: "Button text", type: "text", default: "View order" },
-      { key: "buttonUrl", label: "Button link", type: "url", default: "https://example.com" },
-      { key: "company", label: "Company name", type: "text", default: "Quicksilver" },
+      {
+        key: "buttonText",
+        label: "Button text",
+        type: "text",
+        default: "View order",
+      },
+      {
+        key: "buttonUrl",
+        label: "Button link",
+        type: "url",
+        default: "https://example.com",
+      },
+      {
+        key: "company",
+        label: "Company name",
+        type: "text",
+        default: "Quicksilver",
+      },
       { key: "address", label: "Footer address", type: "text", default: "" },
       { key: "preheader", label: "Preview text", type: "text", default: "" },
     ],
@@ -886,9 +1165,15 @@ export const TEMPLATES: EmailTemplate[] = [
     icon: "🔐",
     category: "Transactional",
     Component: OtpTemplate,
-    subject: (v) => (v.code ? `Your code: ${v.code}` : "Your verification code"),
+    subject: (v) =>
+      v.code ? `Your code: ${v.code}` : "Your verification code",
     fields: [
-      { key: "heading", label: "Heading", type: "text", default: "Your verification code" },
+      {
+        key: "heading",
+        label: "Heading",
+        type: "text",
+        default: "Your verification code",
+      },
       {
         key: "intro",
         label: "Intro",
@@ -896,14 +1181,24 @@ export const TEMPLATES: EmailTemplate[] = [
         default: "Use the code below to finish signing in. It expires shortly.",
       },
       { key: "code", label: "Code", type: "text", default: "482915" },
-      { key: "expiry", label: "Expiry note", type: "text", default: "This code expires in 10 minutes." },
+      {
+        key: "expiry",
+        label: "Expiry note",
+        type: "text",
+        default: "This code expires in 10 minutes.",
+      },
       {
         key: "footnote",
         label: "Footnote",
         type: "text",
         default: "Didn't request this? You can safely ignore this email.",
       },
-      { key: "company", label: "Company name", type: "text", default: "Quicksilver" },
+      {
+        key: "company",
+        label: "Company name",
+        type: "text",
+        default: "Quicksilver",
+      },
       { key: "address", label: "Footer address", type: "text", default: "" },
       { key: "preheader", label: "Preview text", type: "text", default: "" },
     ],
@@ -911,13 +1206,19 @@ export const TEMPLATES: EmailTemplate[] = [
   {
     id: "password-reset",
     name: "Password reset",
-    description: "Security email with a reset button, expiry note, and safe-to-ignore line.",
+    description:
+      "Security email with a reset button, expiry note, and safe-to-ignore line.",
     icon: "🔑",
     category: "Transactional",
     Component: PasswordResetTemplate,
     subject: () => "Reset your password",
     fields: [
-      { key: "heading", label: "Heading", type: "text", default: "Reset your password" },
+      {
+        key: "heading",
+        label: "Heading",
+        type: "text",
+        default: "Reset your password",
+      },
       {
         key: "body",
         label: "Body",
@@ -925,11 +1226,36 @@ export const TEMPLATES: EmailTemplate[] = [
         default:
           "We received a request to reset your password. Click the button below to choose a new one.",
       },
-      { key: "buttonText", label: "Button text", type: "text", default: "Reset password" },
-      { key: "buttonUrl", label: "Button link", type: "url", default: "https://example.com/reset" },
-      { key: "expiry", label: "Expiry note", type: "text", default: "This link expires in 30 minutes." },
-      { key: "footnote", label: "Safe-to-ignore note", type: "textarea", default: "" },
-      { key: "company", label: "Company name", type: "text", default: "Quicksilver" },
+      {
+        key: "buttonText",
+        label: "Button text",
+        type: "text",
+        default: "Reset password",
+      },
+      {
+        key: "buttonUrl",
+        label: "Button link",
+        type: "url",
+        default: "https://example.com/reset",
+      },
+      {
+        key: "expiry",
+        label: "Expiry note",
+        type: "text",
+        default: "This link expires in 30 minutes.",
+      },
+      {
+        key: "footnote",
+        label: "Safe-to-ignore note",
+        type: "textarea",
+        default: "",
+      },
+      {
+        key: "company",
+        label: "Company name",
+        type: "text",
+        default: "Quicksilver",
+      },
       { key: "address", label: "Footer address", type: "text", default: "" },
       { key: "preheader", label: "Preview text", type: "text", default: "" },
     ],
@@ -937,23 +1263,45 @@ export const TEMPLATES: EmailTemplate[] = [
   {
     id: "feedback",
     name: "Feedback request",
-    description: "Centered ask for a review or rating with a star row and button.",
+    description:
+      "Centered ask for a review or rating with a star row and button.",
     icon: "⭐",
     category: "Marketing",
     Component: FeedbackTemplate,
     subject: (v) => v.heading || "How did we do?",
     fields: [
-      { key: "heading", label: "Heading", type: "text", default: "How did we do?" },
+      {
+        key: "heading",
+        label: "Heading",
+        type: "text",
+        default: "How did we do?",
+      },
       {
         key: "body",
         label: "Body",
         type: "textarea",
-        default: "We'd love to hear about your experience. It only takes a minute.",
+        default:
+          "We'd love to hear about your experience. It only takes a minute.",
       },
-      { key: "buttonText", label: "Button text", type: "text", default: "Leave feedback" },
-      { key: "buttonUrl", label: "Button link", type: "url", default: "https://example.com/feedback" },
+      {
+        key: "buttonText",
+        label: "Button text",
+        type: "text",
+        default: "Leave feedback",
+      },
+      {
+        key: "buttonUrl",
+        label: "Button link",
+        type: "url",
+        default: "https://example.com/feedback",
+      },
       { key: "footnote", label: "Footnote", type: "text", default: "" },
-      { key: "company", label: "Company name", type: "text", default: "Quicksilver" },
+      {
+        key: "company",
+        label: "Company name",
+        type: "text",
+        default: "Quicksilver",
+      },
       { key: "address", label: "Footer address", type: "text", default: "" },
       { key: "preheader", label: "Preview text", type: "text", default: "" },
     ],

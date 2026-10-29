@@ -1,13 +1,13 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import { useNavigate } from "react-router-dom";
+import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import ThreadListItem from "./ThreadListItem";
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import EmptyState from "../atoms/EmptyState";
 import ThreadListSkeleton from "../atoms/ThreadListSkeleton";
+import ThreadListItem from "./ThreadListItem";
 
 // Approximate height of one ThreadListItem (avatar + three text rows + padding).
 // react-virtual uses this only for the initial layout estimate; real heights
@@ -135,7 +135,9 @@ const ThreadList = ({
             minHeight: 44,
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mr: "auto" }}>
+          <Box
+            sx={{ display: "flex", alignItems: "center", gap: 1, mr: "auto" }}
+          >
             {onRefresh && (
               <IconButton
                 size="small"
@@ -149,7 +151,9 @@ const ThreadList = ({
             )}
             {live !== undefined && (
               <Box
-                title={live ? "Live — new mail arrives instantly" : "Reconnecting…"}
+                title={
+                  live ? "Live — new mail arrives instantly" : "Reconnecting…"
+                }
                 sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
               >
                 <Box

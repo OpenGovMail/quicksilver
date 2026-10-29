@@ -1,7 +1,7 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
+import type { Address } from "../../nonview/api/types";
 import AppLayout from "../moles/AppLayout";
 import ComposePanel from "../moles/ComposePanel";
-import type { Address } from "../../nonview/api/types";
 
 const parseRecipients = (toParam: string | null): Address[] => {
   if (!toParam) return [];

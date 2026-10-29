@@ -1,4 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import ForwardIcon from "@mui/icons-material/Forward";
+import MarkEmailUnreadIcon from "@mui/icons-material/MarkEmailUnread";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import MoveToInboxIcon from "@mui/icons-material/MoveToInbox";
+import ReplyIcon from "@mui/icons-material/Reply";
+import ReplyAllIcon from "@mui/icons-material/ReplyAll";
 import {
   Box,
   Divider,
@@ -7,24 +16,15 @@ import {
   ListItemText,
   Menu,
   MenuItem,
+  Typography,
 } from "@mui/material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import ReplyIcon from "@mui/icons-material/Reply";
-import ReplyAllIcon from "@mui/icons-material/ReplyAll";
-import ForwardIcon from "@mui/icons-material/Forward";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import MarkEmailUnreadIcon from "@mui/icons-material/MarkEmailUnread";
-import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import MoveToInboxIcon from "@mui/icons-material/MoveToInbox";
-import { Typography } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
+import { isRichHtml } from "../../nonview/email/htmlKind";
+import { stripQuotedText } from "../../nonview/email/quotedText";
 import MessageContent from "../atoms/MessageContent";
 import MessageMeta from "../atoms/MessageMeta";
 import AttachmentList from "./AttachmentList";
 import AttachmentViewer from "./AttachmentViewer";
-import { isRichHtml } from "../../nonview/email/htmlKind";
-import { stripQuotedText } from "../../nonview/email/quotedText";
 
 // Corner radii for bubble stacks: the sender-side corners of grouped bubbles
 // shrink so consecutive messages visually "fuse" (DESIGN.md, Shapes).
@@ -91,14 +91,10 @@ const MessageBubble = ({
       const blob = await onFetchAttachment(message.sourceThreadId, att.id);
       const url = URL.createObjectURL(blob);
       urlRef.current = url;
-      setPreview((p) =>
-        p ? { ...p, url, loading: false } : p,
-      );
+      setPreview((p) => (p ? { ...p, url, loading: false } : p));
     } catch (e) {
       setPreview((p) =>
-        p
-          ? { ...p, loading: false, error: e?.message || "Preview failed" }
-          : p,
+        p ? { ...p, loading: false, error: e?.message || "Preview failed" } : p,
       );
     }
   };
@@ -131,7 +127,9 @@ const MessageBubble = ({
   // header; ids synthesized from the UID ("msg-…") or local optimistic ids
   // can't be searched for.
   const hasMessageId =
-    !!message.id && !message.id.startsWith("msg-") && !message.id.startsWith("local-");
+    !!message.id &&
+    !message.id.startsWith("msg-") &&
+    !message.id.startsWith("local-");
 
   // Fused corners: outer corners keep the full radius; the sender-side corners
   // between grouped bubbles shrink. CSS order is TL TR BR BL.
@@ -171,7 +169,11 @@ const MessageBubble = ({
           <DeleteOutlineIcon sx={{ fontSize: 15 }} />
           <Typography
             variant="caption"
-            sx={{ fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}
+            sx={{
+              fontWeight: 700,
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+            }}
           >
             In Trash
           </Typography>
@@ -266,7 +268,8 @@ const MessageBubble = ({
           editable={false}
           onDownload={
             onDownloadAttachment
-              ? (att) => onDownloadAttachment(message.sourceThreadId, att.id, att.name)
+              ? (att) =>
+                  onDownloadAttachment(message.sourceThreadId, att.id, att.name)
               : undefined
           }
           onPreview={onFetchAttachment ? handlePreview : undefined}
@@ -321,11 +324,15 @@ const MessageBubble = ({
                   onClick={selectAction("restore")}
                   disabled={!hasMessageId}
                 >
-                  <ListItemIcon><MoveToInboxIcon fontSize="small" /></ListItemIcon>
+                  <ListItemIcon>
+                    <MoveToInboxIcon fontSize="small" />
+                  </ListItemIcon>
                   <ListItemText>Move to inbox</ListItemText>
                 </MenuItem>,
                 <MenuItem key="copy" onClick={selectAction("copy")}>
-                  <ListItemIcon><ContentCopyIcon fontSize="small" /></ListItemIcon>
+                  <ListItemIcon>
+                    <ContentCopyIcon fontSize="small" />
+                  </ListItemIcon>
                   <ListItemText>Copy text</ListItemText>
                 </MenuItem>,
                 <Divider key="div" />,
@@ -335,26 +342,36 @@ const MessageBubble = ({
                   disabled={!hasMessageId}
                   sx={{ color: "error.main" }}
                 >
-                  <ListItemIcon><DeleteForeverIcon fontSize="small" color="error" /></ListItemIcon>
+                  <ListItemIcon>
+                    <DeleteForeverIcon fontSize="small" color="error" />
+                  </ListItemIcon>
                   <ListItemText>Delete permanently</ListItemText>
                 </MenuItem>,
               ]
             : [
                 <MenuItem key="reply" onClick={selectAction("reply")}>
-                  <ListItemIcon><ReplyIcon fontSize="small" /></ListItemIcon>
+                  <ListItemIcon>
+                    <ReplyIcon fontSize="small" />
+                  </ListItemIcon>
                   <ListItemText>Reply</ListItemText>
                 </MenuItem>,
                 <MenuItem key="replyAll" onClick={selectAction("replyAll")}>
-                  <ListItemIcon><ReplyAllIcon fontSize="small" /></ListItemIcon>
+                  <ListItemIcon>
+                    <ReplyAllIcon fontSize="small" />
+                  </ListItemIcon>
                   <ListItemText>Reply all</ListItemText>
                 </MenuItem>,
                 <MenuItem key="forward" onClick={selectAction("forward")}>
-                  <ListItemIcon><ForwardIcon fontSize="small" /></ListItemIcon>
+                  <ListItemIcon>
+                    <ForwardIcon fontSize="small" />
+                  </ListItemIcon>
                   <ListItemText>Forward</ListItemText>
                 </MenuItem>,
                 <Divider key="div1" />,
                 <MenuItem key="copy" onClick={selectAction("copy")}>
-                  <ListItemIcon><ContentCopyIcon fontSize="small" /></ListItemIcon>
+                  <ListItemIcon>
+                    <ContentCopyIcon fontSize="small" />
+                  </ListItemIcon>
                   <ListItemText>Copy text</ListItemText>
                 </MenuItem>,
                 <Divider key="div2" />,
@@ -363,7 +380,9 @@ const MessageBubble = ({
                   onClick={selectAction("unread")}
                   disabled={!hasServerIdentity}
                 >
-                  <ListItemIcon><MarkEmailUnreadIcon fontSize="small" /></ListItemIcon>
+                  <ListItemIcon>
+                    <MarkEmailUnreadIcon fontSize="small" />
+                  </ListItemIcon>
                   <ListItemText>Mark unread</ListItemText>
                 </MenuItem>,
                 <MenuItem
@@ -371,7 +390,9 @@ const MessageBubble = ({
                   onClick={selectAction("archive")}
                   disabled={!hasServerIdentity}
                 >
-                  <ListItemIcon><ArchiveOutlinedIcon fontSize="small" /></ListItemIcon>
+                  <ListItemIcon>
+                    <ArchiveOutlinedIcon fontSize="small" />
+                  </ListItemIcon>
                   <ListItemText>Archive</ListItemText>
                 </MenuItem>,
                 <MenuItem
@@ -380,7 +401,9 @@ const MessageBubble = ({
                   disabled={!hasServerIdentity}
                   sx={{ color: "error.main" }}
                 >
-                  <ListItemIcon><DeleteOutlineIcon fontSize="small" color="error" /></ListItemIcon>
+                  <ListItemIcon>
+                    <DeleteOutlineIcon fontSize="small" color="error" />
+                  </ListItemIcon>
                   <ListItemText>Delete</ListItemText>
                 </MenuItem>,
               ]}
@@ -397,7 +420,12 @@ const MessageBubble = ({
         error={preview?.error}
         onDownload={
           onDownloadAttachment && preview
-            ? () => onDownloadAttachment(message.sourceThreadId, preview.id, preview.name)
+            ? () =>
+                onDownloadAttachment(
+                  message.sourceThreadId,
+                  preview.id,
+                  preview.name,
+                )
             : null
         }
       />

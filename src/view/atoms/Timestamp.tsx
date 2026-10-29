@@ -1,6 +1,6 @@
-import React from "react";
 import { Typography } from "@mui/material";
-import { formatDistanceToNow, format, isToday, isYesterday } from "date-fns";
+import { format, formatDistanceToNow, isToday, isYesterday } from "date-fns";
+import React from "react";
 
 const Timestamp = ({ date, format: formatType = "relative" }) => {
   const formatTimestamp = () => {

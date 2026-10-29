@@ -45,26 +45,26 @@ internal/
 
 ## API (current)
 
-| Method | Path        | Auth | Purpose                |
-|-------:|-------------|------|------------------------|
-| GET    | `/healthz`  | none | Liveness probe         |
-| GET    | `/readyz`   | none | Readiness probe        |
+| Method | Path       | Auth | Purpose         |
+| -----: | ---------- | ---- | --------------- |
+|    GET | `/healthz` | none | Liveness probe  |
+|    GET | `/readyz`  | none | Readiness probe |
 
 Mail and auth endpoints land in subsequent phases. See repo root design docs for the full spec.
 
 ## Make targets
 
-| Target          | What it does                          |
-|-----------------|---------------------------------------|
-| `make build`    | Compile to `bin/quicksilver-server`         |
-| `make run`      | `go run ./cmd/server`                 |
-| `make test`     | `go test ./...`                       |
-| `make test-race`| Same with `-race -count=1`            |
-| `make vet`      | `go vet ./...`                        |
-| `make fmt`      | `gofmt -s -w .`                       |
-| `make lint`     | `golangci-lint run` if installed      |
-| `make tidy`     | `go mod tidy`                         |
-| `make docker`   | Build distroless image                |
+| Target           | What it does                        |
+| ---------------- | ----------------------------------- |
+| `make build`     | Compile to `bin/quicksilver-server` |
+| `make run`       | `go run ./cmd/server`               |
+| `make test`      | `go test ./...`                     |
+| `make test-race` | Same with `-race -count=1`          |
+| `make vet`       | `go vet ./...`                      |
+| `make fmt`       | `gofmt -s -w .`                     |
+| `make lint`      | `golangci-lint run` if installed    |
+| `make tidy`      | `go mod tidy`                       |
+| `make docker`    | Build distroless image              |
 
 ## Production notes
 

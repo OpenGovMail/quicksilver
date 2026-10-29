@@ -84,25 +84,25 @@ Then open **http://localhost:3000/quicksilver/** in your browser.
 
 ### Available scripts
 
-| Command             | Stack    | Description                                                |
-| ------------------- | -------- | ---------------------------------------------------------- |
-| `pnpm run dev`       | frontend | Vite dev server (http://localhost:3000/quicksilver/, HMR)        |
-| `pnpm start`         | frontend | Alias for `pnpm run dev`                                    |
-| `pnpm run build`     | frontend | Production bundle → `build/`                               |
-| `pnpm run preview`   | frontend | Preview the production build locally                       |
-| `pnpm run typecheck` | frontend | `tsc --noEmit` (does not block `build`)                    |
-| `make run`          | backend  | `go run ./cmd/server` (run from `server/`)                 |
-| `make build`        | backend  | Build → `server/bin/quicksilver-server`                          |
-| `make test`         | backend  | `go test ./...`                                            |
-| `make test-race`    | backend  | Same, with the race detector                               |
-| `make docker`       | backend  | Multi-stage distroless image                               |
+| Command              | Stack    | Description                                               |
+| -------------------- | -------- | --------------------------------------------------------- |
+| `pnpm run dev`       | frontend | Vite dev server (http://localhost:3000/quicksilver/, HMR) |
+| `pnpm start`         | frontend | Alias for `pnpm run dev`                                  |
+| `pnpm run build`     | frontend | Production bundle → `build/`                              |
+| `pnpm run preview`   | frontend | Preview the production build locally                      |
+| `pnpm run typecheck` | frontend | `tsc --noEmit` (does not block `build`)                   |
+| `make run`           | backend  | `go run ./cmd/server` (run from `server/`)                |
+| `make build`         | backend  | Build → `server/bin/quicksilver-server`                   |
+| `make test`          | backend  | `go test ./...`                                           |
+| `make test-race`     | backend  | Same, with the race detector                              |
+| `make docker`        | backend  | Multi-stage distroless image                              |
 
 ### Environment variables
 
-| Var (frontend `.env`)    | Default                  | Purpose                                                       |
-| ------------------------ | ------------------------ | ------------------------------------------------------------- |
-| `VITE_API_BASE_URL`      | `""` (same-origin proxy) | Absolute backend URL for prod builds                          |
-| `VITE_API_PROXY_TARGET`  | `http://localhost:8080`  | Where Vite dev proxies `/api`                                 |
+| Var (frontend `.env`)   | Default                  | Purpose                              |
+| ----------------------- | ------------------------ | ------------------------------------ |
+| `VITE_API_BASE_URL`     | `""` (same-origin proxy) | Absolute backend URL for prod builds |
+| `VITE_API_PROXY_TARGET` | `http://localhost:8080`  | Where Vite dev proxies `/api`        |
 
 Backend vars live in `server/.env` and are documented in [`server/.env.example`](server/.env.example).
 

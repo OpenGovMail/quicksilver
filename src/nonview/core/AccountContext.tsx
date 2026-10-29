@@ -1,4 +1,5 @@
-import React, {
+import type React from "react";
+import {
   createContext,
   useCallback,
   useContext,
@@ -7,17 +8,17 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useAuth } from "./AuthContext";
 import { APIClient, APIError, defaultBaseURL } from "../api/client";
 import { clearAccount } from "../cache/db";
+import { useAuth } from "./AuthContext";
 import {
   type AccountSession,
-  type LinkedAccount,
-  type RegistrationData,
   getAccount,
   getAccounts,
   getSession,
   getSessions,
+  type LinkedAccount,
+  type RegistrationData,
   removeAccountFromStorage,
   removeSession,
   saveAccount,
@@ -25,6 +26,7 @@ import {
   toLoginRequest,
   updateAccount as updateAccountStorage,
 } from "./accountStorage";
+
 interface AccountContextValue {
   accounts: LinkedAccount[];
   sessions: AccountSession[];
@@ -36,7 +38,10 @@ interface AccountContextValue {
 
   addAccount: (data: RegistrationData) => Promise<LinkedAccount>;
   reauthenticate: (id: string, password: string) => Promise<void>;
-  updateAccount: (id: string, updates: Partial<LinkedAccount>) => LinkedAccount | null;
+  updateAccount: (
+    id: string,
+    updates: Partial<LinkedAccount>,
+  ) => LinkedAccount | null;
   signOut: (id: string) => Promise<void>;
   switchAccount: (id: string) => void;
   removeAccount: (id: string) => Promise<void>;
@@ -59,7 +64,9 @@ interface AccountProviderProps {
   children: React.ReactNode;
 }
 
-export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) => {
+export const AccountProvider: React.FC<AccountProviderProps> = ({
+  children,
+}) => {
   const authContext = useAuth();
 
   const [accounts, setAccounts] = useState<LinkedAccount[]>([]);
@@ -91,7 +98,9 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
           const s = activeSessionRef.current;
           if (!s) return;
           removeSession(s.accountId);
-          setSessions((prev) => prev.filter((x) => x.accountId !== s.accountId));
+          setSessions((prev) =>
+            prev.filter((x) => x.accountId !== s.accountId),
+          );
         },
       }),
     [],
@@ -103,11 +112,15 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
     setAccounts(loadedAccounts);
     setSessions(loadedSessions);
 
-    const urlAccountId = new URLSearchParams(window.location.search).get("account");
+    const urlAccountId = new URLSearchParams(window.location.search).get(
+      "account",
+    );
     const hasValidUrlAccount =
       !!urlAccountId && loadedAccounts.some((a) => a.id === urlAccountId);
 
-    let id = hasValidUrlAccount ? urlAccountId : sessionStorage.getItem(STORAGE_ACTIVE_ACCOUNT);
+    let id = hasValidUrlAccount
+      ? urlAccountId
+      : sessionStorage.getItem(STORAGE_ACTIVE_ACCOUNT);
     if (!id && loadedAccounts.length === 1) {
       id = loadedAccounts[0].id;
     }
@@ -145,7 +158,11 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
         smtpSecure: data.smtpSecure,
       };
       saveAccount(account);
-      saveSession({ accountId: id, token: resp.token, expiresAt: resp.expires_at });
+      saveSession({
+        accountId: id,
+        token: resp.token,
+        expiresAt: resp.expires_at,
+      });
       setAccounts(getAccounts());
       setSessions(getSessions());
       return account;
@@ -157,10 +174,18 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
     async (id: string, password: string): Promise<void> => {
       const account = getAccount(id);
       if (!account) {
-        throw new APIError(400, "no_account", "No linked account found for that id.");
+        throw new APIError(
+          400,
+          "no_account",
+          "No linked account found for that id.",
+        );
       }
       const resp = await authContext.login(toLoginRequest(account, password));
-      saveSession({ accountId: id, token: resp.token, expiresAt: resp.expires_at });
+      saveSession({
+        accountId: id,
+        token: resp.token,
+        expiresAt: resp.expires_at,
+      });
       setSessions(getSessions());
       if (!activeAccountId) switchAccount(id);
     },
@@ -243,7 +268,9 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
     logoutAll,
   };
 
-  return <AccountContext.Provider value={value}>{children}</AccountContext.Provider>;
+  return (
+    <AccountContext.Provider value={value}>{children}</AccountContext.Provider>
+  );
 };
 
 export default AccountContext;

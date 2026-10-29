@@ -1,6 +1,6 @@
-import React from "react";
-import { Box, Typography } from "@mui/material";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
+import { Box, Typography } from "@mui/material";
+import React from "react";
 
 const EmptyState = ({
   icon: CustomIcon = null,
@@ -42,7 +42,11 @@ const EmptyState = ({
         {title}
       </Typography>
       {description && (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2, maxWidth: 360 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mb: 2, maxWidth: 360 }}
+        >
           {description}
         </Typography>
       )}

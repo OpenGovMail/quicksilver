@@ -1,11 +1,11 @@
-import React from "react";
-import { Box, Button } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 import LogoutIcon from "@mui/icons-material/Logout";
+import { Box, Button } from "@mui/material";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import { useAccount } from "../../nonview/core/AccountContext";
 import AppLayout from "../moles/AppLayout";
-import ProfileHeader from "../moles/ProfileHeader";
 import ProfileForm from "../moles/ProfileForm";
+import ProfileHeader from "../moles/ProfileHeader";
 
 function ProfilePage() {
   const { activeAccount, updateAccount, signOut } = useAccount();

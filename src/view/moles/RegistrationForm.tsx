@@ -1,13 +1,13 @@
-import React, { useState } from "react";
 import {
   Box,
-  TextField,
   Button,
   CircularProgress,
-  MenuItem,
-  Typography,
   Divider,
+  MenuItem,
+  TextField,
+  Typography,
 } from "@mui/material";
+import React, { useState } from "react";
 import ErrorMessage from "../atoms/ErrorMessage";
 
 // Email service provider configurations

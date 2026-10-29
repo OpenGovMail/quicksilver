@@ -1,8 +1,13 @@
-import React, { createContext, useContext, useMemo } from "react";
+import type React from "react";
+import { createContext, useContext, useMemo } from "react";
 import { APIClient, defaultBaseURL } from "../api/client";
 import { auth as authAPI } from "../api/endpoints";
-import { type AccountSession, type RegistrationData, toLoginRequest } from "./accountStorage";
 import type { LoginRequest, LoginResponse } from "../api/types";
+import {
+  type AccountSession,
+  type RegistrationData,
+  toLoginRequest,
+} from "./accountStorage";
 
 // Pure auth mechanics: how credentials become a valid session. No account
 // list, no active-account state, no apiClient ownership — that's

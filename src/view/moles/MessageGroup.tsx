@@ -1,18 +1,25 @@
+import { Avatar, Box, Tooltip, Typography } from "@mui/material";
 import React from "react";
-import { Box, Avatar, Tooltip, Typography } from "@mui/material";
-import { getInitials, getAvatarColor } from "../_constants/avatarUtils";
-import MessageBubble from "./MessageBubble";
 import { useAccount } from "../../nonview/core/AccountContext";
+import { getAvatarColor, getInitials } from "../_constants/avatarUtils";
+import MessageBubble from "./MessageBubble";
 
 // One "To: a, b" / "Cc: c" line inside the avatar hover-card.
 const AddressLine = ({ label, people }) => {
   if (!people || people.length === 0) return null;
   const text = people
-    .map((p) => (p.name && p.name !== p.email ? `${p.name} <${p.email}>` : p.email || p.name))
+    .map((p) =>
+      p.name && p.name !== p.email
+        ? `${p.name} <${p.email}>`
+        : p.email || p.name,
+    )
     .join(", ");
   return (
     <Typography variant="caption" component="div" sx={{ opacity: 0.9 }}>
-      <Box component="span" sx={{ fontWeight: 700 }}>{label}:</Box> {text}
+      <Box component="span" sx={{ fontWeight: 700 }}>
+        {label}:
+      </Box>{" "}
+      {text}
     </Typography>
   );
 };
@@ -28,7 +35,9 @@ const MessageGroup = ({
 
   if (!messages.length) return null;
 
-  const isSent = sender?.id === "current" || (activeAccount?.email && sender?.email === activeAccount?.email);
+  const isSent =
+    sender?.id === "current" ||
+    (activeAccount?.email && sender?.email === activeAccount?.email);
   const senderName = sender?.name || "Unknown";
 
   // Addressing details for the hover-card (issue #40). Recipients rarely vary

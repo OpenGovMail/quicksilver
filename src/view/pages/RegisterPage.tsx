@@ -1,6 +1,6 @@
+import { Box, Container, Link, Typography } from "@mui/material";
 import React, { useState } from "react";
-import { Box, Container, Typography, Link } from "@mui/material";
-import { useNavigate, Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useAccount } from "../../nonview/core/AccountContext";
 import RegistrationForm from "../moles/RegistrationForm";
 
