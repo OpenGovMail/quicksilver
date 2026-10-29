@@ -73,17 +73,19 @@ const ThreadList = ({
   const rowVirtualizer = useVirtualizer({
     count: threads?.length || 0,
     getScrollElement: () => parentRef.current,
+    getItemKey: (index) => threads?.[index]?.id ?? index,
     estimateSize: () => ESTIMATED_ROW_HEIGHT,
     // Render a few extra rows above/below the viewport so fast scrolling
     // doesn't flash blank space.
     overscan: 8,
+    enabled: !loading && threads?.length > 0,
   });
 
   // Jump back to the top of the list whenever the page changes, so a new page
   // starts at its first message rather than wherever the previous one scrolled.
   useEffect(() => {
     rowVirtualizer.scrollToOffset(0);
-  }, [page, rowVirtualizer]);
+  }, [page]);
 
   if (loading) {
     return <ThreadListSkeleton />;
@@ -211,13 +213,13 @@ const ThreadList = ({
           }}
         >
           {items.map((virtualRow) => {
-            const thread = threads[virtualRow.index];
+            const thread = threads[virtualRow?.index];
             return (
-              <Box
-                key={thread.id}
+              <div
+                key={virtualRow.key}
                 data-index={virtualRow.index}
                 ref={rowVirtualizer.measureElement}
-                sx={{
+                style={{
                   position: "absolute",
                   top: 0,
                   left: 0,
@@ -231,7 +233,7 @@ const ThreadList = ({
                   onClick={handleThreadClick}
                   onPrefetch={onPrefetch}
                 />
-              </Box>
+              </div>
             );
           })}
         </Box>
