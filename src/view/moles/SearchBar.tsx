@@ -1,7 +1,7 @@
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
 import { IconButton, InputBase, Paper } from "@mui/material";
-import React, { useState } from "react";
+import { useState } from "react";
 
 const SearchBar = ({ onSearch, placeholder = "Search..." }) => {
   const [value, setValue] = useState("");

@@ -6,7 +6,6 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import React from "react";
 import { useNavigate } from "react-router-dom";
 
 // Subject-only header (issue #40): thread-level action icons are gone — every

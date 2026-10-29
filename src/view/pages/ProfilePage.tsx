@@ -1,6 +1,5 @@
 import LogoutIcon from "@mui/icons-material/Logout";
 import { Box, Button } from "@mui/material";
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAccount } from "../../nonview/core/AccountContext";
 import AppLayout from "../moles/AppLayout";

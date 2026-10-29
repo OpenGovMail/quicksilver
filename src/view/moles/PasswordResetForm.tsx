@@ -1,5 +1,5 @@
 import { Box, Button, CircularProgress, TextField } from "@mui/material";
-import React, { useState } from "react";
+import { useState } from "react";
 import ErrorMessage from "../atoms/ErrorMessage";
 
 const PasswordResetForm = ({ onSubmit, loading = false }) => {

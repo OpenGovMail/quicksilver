@@ -1,5 +1,5 @@
 import { Box, Container, Link, Typography } from "@mui/material";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { APIError } from "../../nonview/api/client";
 import { useAccount } from "../../nonview/core/AccountContext";
