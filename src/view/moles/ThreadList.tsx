@@ -3,7 +3,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import React, { useEffect, useRef, useState } from "react";
+import React, { startTransition, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import EmptyState from "../atoms/EmptyState";
 import ThreadListSkeleton from "../atoms/ThreadListSkeleton";
@@ -51,12 +51,6 @@ const ThreadList = ({
     }
   };
 
-  // Jump back to the top of the list whenever the page changes, so a new page
-  // starts at its first message rather than wherever the previous one scrolled.
-  useEffect(() => {
-    if (parentRef.current) parentRef.current.scrollTop = 0;
-  }, [page]);
-
   // Predictive prefetch of the top few threads (proposal §7). The messages at
   // the top of a folder are the ones a user is most likely to open, so warm
   // their bodies into the cache during idle time — off the critical render
@@ -85,6 +79,12 @@ const ThreadList = ({
     overscan: 8,
   });
 
+  // Jump back to the top of the list whenever the page changes, so a new page
+  // starts at its first message rather than wherever the previous one scrolled.
+  useEffect(() => {
+    rowVirtualizer.scrollToOffset(0);
+  }, [page, rowVirtualizer]);
+
   if (loading) {
     return <ThreadListSkeleton />;
   }
@@ -97,7 +97,7 @@ const ThreadList = ({
     // Thread IDs are mailbox+uid composites and may contain slashes (e.g.
     // "[Gmail]/Sent Mail:807"). Encode so the route's `:threadId` matches a
     // single path segment; useParams() decodes it back automatically.
-    navigate(`/thread/${encodeURIComponent(threadId)}`);
+    startTransition(() => navigate(`/thread/${encodeURIComponent(threadId)}`));
   };
 
   const items = rowVirtualizer.getVirtualItems();
@@ -183,7 +183,7 @@ const ThreadList = ({
                 size="small"
                 aria-label="Newer messages"
                 disabled={!canPrev}
-                onClick={() => onPrev && onPrev()}
+                onClick={() => onPrev?.()}
               >
                 <ChevronLeftIcon />
               </IconButton>
@@ -191,7 +191,7 @@ const ThreadList = ({
                 size="small"
                 aria-label="Older messages"
                 disabled={!canNext}
-                onClick={() => onNext && onNext()}
+                onClick={() => onNext?.()}
               >
                 <ChevronRightIcon />
               </IconButton>
