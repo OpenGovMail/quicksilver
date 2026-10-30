@@ -25,7 +25,7 @@ import {
   Row,
   Section,
   Text,
-} from "@react-email/components";
+} from "react-email";
 import type React from "react";
 
 // Quicksilver brand palette (mirrors src/theme.ts).
