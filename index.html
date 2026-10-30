@@ -13,25 +13,144 @@
     <link rel="manifest" href="/manifest.json" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
 
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Quicksilver" />
+    <meta
+      property="og:url"
+      content="https://opengovmail.github.io/quicksilver/"
+    />
+    <meta property="og:title" content="Quicksilver — Email 2.0 Client" />
+    <meta
+      property="og:description"
+      content="Modern React + TypeScript email client bringing the Email 2.0 vision — conversational, offline-first, multilingual, secure by design."
+    />
+    <meta
+      property="og:image"
+      content="https://opengovmail.github.io/quicksilver/og-image.jpg"
+    />
+    <meta
+      property="og:image:secure_url"
+      content="https://opengovmail.github.io/quicksilver/og-image.jpg"
+    />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1424" />
+    <meta property="og:image:height" content="752" />
+    <meta
+      property="og:image:alt"
+      content="Quicksilver 3D Sri Lanka diorama featuring iconic landmarks, Sinhala Ayubowan, and Tamil Vanakkam multilingual email concept."
+    />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="si_LK" />
+    <meta property="og:locale:alternate" content="ta_LK" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:url"
+      content="https://opengovmail.github.io/quicksilver/"
+    />
+    <meta name="twitter:title" content="Quicksilver — Email 2.0 Client" />
+    <meta
+      name="twitter:description"
+      content="Modern React + TypeScript email client bringing the Email 2.0 vision — conversational, offline-first, multilingual, secure by design."
+    />
+    <meta
+      name="twitter:image"
+      content="https://opengovmail.github.io/quicksilver/og-image.jpg"
+    />
+    <meta
+      name="twitter:image:alt"
+      content="Quicksilver Email 2.0 diorama with Sri Lankan landmarks and multilingual greetings"
+    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://github.com/OpenGovMail#organization",
+            "name": "OpenGovMail",
+            "url": "https://github.com/OpenGovMail"
+          },
+          {
+            "@type": "WebApplication",
+            "@id": "https://opengovmail.github.io/quicksilver/#webapp",
+            "name": "Quicksilver",
+            "url": "https://opengovmail.github.io/quicksilver/",
+            "image": "https://opengovmail.github.io/quicksilver/og-image.jpg",
+            "description": "A modern React-based email client implementing the Email 2.0 vision: conversational messaging UI, security by design, offline-first capabilities, and multilingual support.",
+            "applicationCategory": "CommunicationApplication",
+            "operatingSystem": "All modern web browsers",
+            "browserRequirements": "Requires JavaScript and HTML5 support (Chrome, Firefox, Safari, Edge)",
+            "inLanguage": ["en", "ta", "si"],
+            "codeRepository": "https://github.com/OpenGovMail/quicksilver",
+            "author": {
+              "@id": "https://github.com/OpenGovMail#organization"
+            },
+            "publisher": {
+              "@id": "https://github.com/OpenGovMail#organization"
+            },
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD",
+              "availability": "https://schema.org/InStock"
+            },
+            "featureList": [
+              "Modern conversational UX with WhatsApp-like messaging simplicity",
+              "Security & Privacy by Design with AES-GCM session sealing and JWT tokens",
+              "Direct IMAP and SMTP brokering with zero-mail retention on server",
+              "Offline-first architecture for resilient connectivity",
+              "Multilingual support with Tamil (தமிழ்) and Sinhala (සිංහල) translation",
+              "Roles and groups management for personal and organizational workflows",
+              "Smart AI-powered organization and categorization"
+            ]
+          },
+          {
+            "@type": "SoftwareSourceCode",
+            "@id": "https://github.com/OpenGovMail/quicksilver#code",
+            "name": "Quicksilver Source Code",
+            "codeRepository": "https://github.com/OpenGovMail/quicksilver",
+            "programmingLanguage": ["TypeScript", "Go", "HTML", "CSS"],
+            "runtimePlatform": ["React 19", "Node.js 20+", "Go 1.23+"],
+            "author": {
+              "@id": "https://github.com/OpenGovMail#organization"
+            },
+            "targetProduct": {
+              "@id": "https://opengovmail.github.io/quicksilver/#webapp"
+            }
+          }
+        ]
+      }
+    </script>
     <!-- Start Single Page Apps for GitHub Pages -->
     <script type="text/javascript">
       // Single Page Apps for GitHub Pages
       // https://github.com/rafgraph/spa-github-pages
-      (((l) => {
-        if (l.search[1] === '/' ) {
-          var decoded = l.search.slice(1).split('&').map((s) => s.replace(/~and~/g, '&')).join('?');
-          window.history.replaceState(null, null,
-              l.pathname.slice(0, -1) + decoded + l.hash
+      ((l) => {
+        if (l.search[1] === "/") {
+          var decoded = l.search
+            .slice(1)
+            .split("&")
+            .map((s) => s.replace(/~and~/g, "&"))
+            .join("?");
+          window.history.replaceState(
+            null,
+            null,
+            l.pathname.slice(0, -1) + decoded + l.hash,
           );
         }
-      })(window.location))
+      })(window.location);
     </script>
     <!-- End Single Page Apps for GitHub Pages -->
 
     <title>Quicksilver</title>
   </head>
+
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
