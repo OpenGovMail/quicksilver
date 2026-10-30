@@ -83,6 +83,7 @@ const ThreadList = ({
 
   // Jump back to the top of the list whenever the page changes, so a new page
   // starts at its first message rather than wherever the previous one scrolled.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only reset scroll when the page changes; rowVirtualizer reference changes should not trigger a scroll reset.
   useEffect(() => {
     rowVirtualizer.scrollToOffset(0);
   }, [page]);
