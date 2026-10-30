@@ -7,6 +7,7 @@ import {
   Typography,
 } from "@mui/material";
 import type React from "react";
+import { useDeferredValue } from "react";
 import type {
   EmailTemplate,
   TemplateField,
@@ -83,6 +84,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
   onChange,
   onChangeTemplate,
 }) => {
+  const deferredValues = useDeferredValue(values);
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <Box
@@ -139,7 +141,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
 
       {/* Preview sits below the form on its own full-width row. */}
       <Box sx={{ height: { xs: 480, md: 620 } }}>
-        <TemplatePreview templateId={template.id} values={values} />
+        <TemplatePreview templateId={template.id} values={deferredValues} />
       </Box>
     </Box>
   );

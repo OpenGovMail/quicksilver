@@ -244,8 +244,8 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({
 
   const logoutAll = useCallback(async (): Promise<void> => {
     const allSessions = getSessions();
-    await Promise.all(allSessions.map((s) => authContext.logout(s)));
-    allSessions.forEach((s) => removeSession(s.accountId));
+    await Promise.allSettled(allSessions.map((s) => authContext.logout(s)));
+    allSessions.map((s) => removeSession(s.accountId));
     setSessions(getSessions());
     sessionStorage.removeItem(STORAGE_ACTIVE_ACCOUNT);
     setActiveAccountId(null);

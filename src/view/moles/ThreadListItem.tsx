@@ -25,13 +25,17 @@ const ThreadListItem = ({
   const participantName = participants?.[0]?.name || "Unknown";
   const isUnread = unreadCount > 0;
 
+  const onPrefetchInteraction = () => {
+    onPrefetch?.(id);
+  };
+
   return (
     <Box
       onClick={() => onClick(id)}
       // Predictive prefetch (proposal §7): warm this thread's body into the
       // cache the moment the pointer/focus lands on it, so the open is instant.
-      onMouseEnter={onPrefetch ? () => onPrefetch(id) : undefined}
-      onFocus={onPrefetch ? () => onPrefetch(id) : undefined}
+      onMouseEnter={onPrefetchInteraction}
+      onFocus={onPrefetchInteraction}
       sx={{
         position: "relative",
         display: "flex",
