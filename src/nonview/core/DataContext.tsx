@@ -244,7 +244,12 @@ function groupThreadsBySubject(sourceThreads: Thread[]): Thread[] {
   const groups = new Map<string, Thread[]>();
   for (const thread of sourceThreads) {
     const key = normalizeSubject(thread.subject);
-    groups.set(key, [...(groups.get(key) || []), thread]);
+    const existing = groups.get(key);
+    if (existing) {
+      existing.push(thread);
+    } else {
+      groups.set(key, [thread]);
+    }
   }
 
   return Array.from(groups.entries())
