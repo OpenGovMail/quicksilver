@@ -9,6 +9,7 @@
 // To add a template: append an entry to TEMPLATES with a unique id, a field
 // list, an optional subject() helper, and a Component that reads `values`.
 
+import type React from "react";
 import {
   Body,
   Button,
@@ -26,7 +27,6 @@ import {
   Section,
   Text,
 } from "react-email";
-import type React from "react";
 
 // Quicksilver brand palette (mirrors src/theme.ts).
 const BRAND = {
