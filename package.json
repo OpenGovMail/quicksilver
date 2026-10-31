@@ -27,7 +27,6 @@
     "@mui/material": "^7.3.11",
     "@mui/styled-engine-sc": "^7.3.10",
     "@mui/x-charts": "^8.29.3",
-    "@react-email/render": "^2.2.0",
     "@tanstack/react-virtual": "^3.14.24",
     "@types/dompurify": "^3.2.0",
     "date-fns": "^4.4.0",
