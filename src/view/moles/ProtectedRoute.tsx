@@ -1,5 +1,4 @@
 import { Box, CircularProgress } from "@mui/material";
-import React from "react";
 import { Navigate } from "react-router-dom";
 import { useAccount } from "../../nonview/core/AccountContext";
 

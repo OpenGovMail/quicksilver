@@ -7,7 +7,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import { useState } from "react";
 import ErrorMessage from "../atoms/ErrorMessage";
 
 // Email service provider configurations
@@ -52,7 +52,7 @@ const EMAIL_PROVIDERS = {
     smtpPort: 465,
     smtpSecure: true,
   },
-};
+} as const;
 
 const RegistrationForm = ({ onSubmit, loading = false }) => {
   const [formData, setFormData] = useState({
