@@ -1,7 +1,7 @@
 import EditIcon from "@mui/icons-material/Edit";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import { Box, Fab, useMediaQuery, useTheme } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import { Outlet, useMatch } from "react-router-dom";
 import { useData } from "../../nonview/core/DataContext";
 import EmptyState from "../atoms/EmptyState";
@@ -25,28 +25,29 @@ function MailPage() {
   } = useData();
   const { openCompose } = useCompose();
   const [searchQuery, setSearchQuery] = useState("");
+  const deferQuery = useDeferredValue(searchQuery, "");
 
   const thread = threadId ? getThread(threadId) : undefined;
 
   const filteredThreads = useMemo(() => {
-    if (!searchQuery) return emailThreads;
-    const query = searchQuery.toLowerCase();
+    if (!deferQuery?.trim?.()) return emailThreads;
+    const query = deferQuery?.trim?.()?.toLowerCase?.();
     return emailThreads.filter(
       (thread) =>
         thread.subject.toLowerCase().includes(query) ||
         thread.lastMessage.toLowerCase().includes(query) ||
         thread.participants.some((p) => p.name.toLowerCase().includes(query)),
     );
-  }, [emailThreads, searchQuery]);
+  }, [emailThreads, deferQuery]);
 
   const list = (
     <ThreadList
       threads={filteredThreads}
       loading={loading}
       emptyMessage={
-        searchQuery ? "No emails match your search" : "No emails yet"
+        deferQuery ? "No emails match your search" : "No emails yet"
       }
-      onRefresh={searchQuery ? undefined : refreshActive}
+      onRefresh={deferQuery ? undefined : refreshActive}
       live={realtimeConnected}
       onPrefetch={prefetchMessages}
       selectedThreadId={threadId}

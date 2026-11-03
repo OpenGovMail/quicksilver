@@ -1,5 +1,5 @@
 import { Fab, type FabProps } from "@mui/material";
-import React from "react";
+import { createElement, isValidElement } from "react";
 
 const FloatingActionButton = ({
   icon: Icon,
@@ -9,9 +9,9 @@ const FloatingActionButton = ({
 }) => {
   const renderIcon = () => {
     if (!Icon) return null;
-    if (React.isValidElement(Icon)) return Icon;
+    if (isValidElement(Icon)) return Icon;
     if (typeof Icon === "function" || typeof Icon === "object") {
-      return React.createElement(Icon);
+      return createElement(Icon);
     }
     return null;
   };

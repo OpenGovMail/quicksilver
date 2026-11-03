@@ -3,7 +3,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import EmptyState from "../atoms/EmptyState";
 import ThreadListSkeleton from "../atoms/ThreadListSkeleton";

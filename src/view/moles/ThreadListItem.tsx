@@ -1,7 +1,6 @@
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { Avatar, Box, Typography } from "@mui/material";
-import React from "react";
 import { getAvatarColor, getInitials } from "../_constants/avatarUtils";
 import Timestamp from "../atoms/Timestamp";
 

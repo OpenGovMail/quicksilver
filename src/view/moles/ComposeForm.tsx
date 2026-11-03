@@ -1,7 +1,7 @@
 import DashboardCustomizeOutlinedIcon from "@mui/icons-material/DashboardCustomizeOutlined";
 import NotesIcon from "@mui/icons-material/Notes";
 import { Box, TextField, ToggleButton, ToggleButtonGroup } from "@mui/material";
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { getTemplate } from "../../nonview/email/templates";
 import ComposeActions from "./ComposeActions";
 import RecipientInput from "./RecipientInput";
