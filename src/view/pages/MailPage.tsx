@@ -7,6 +7,7 @@ import type {
 } from "react";
 import {
   startTransition,
+  useCallback,
   useDeferredValue,
   useEffect,
   useMemo,
@@ -31,23 +32,39 @@ function clampSidebarWidth(width: number): number {
 }
 
 function readSidebarWidth(): number {
-  const stored = Number(localStorage.getItem(SIDEBAR_WIDTH_KEY));
-  if (!Number.isFinite(stored) || stored <= 0) return SIDEBAR_DEFAULT_WIDTH;
-  return clampSidebarWidth(stored);
+  try {
+    const stored = Number(localStorage.getItem(SIDEBAR_WIDTH_KEY));
+    if (!Number.isFinite(stored) || stored <= 0) return SIDEBAR_DEFAULT_WIDTH;
+    return clampSidebarWidth(stored);
+  } catch {
+    return SIDEBAR_DEFAULT_WIDTH;
+  }
 }
 
 const MINI_SEARCH_OPTIONS = {
   fields: ["subject", "lastMessage", "participants"],
 
   extractField: (document: Thread, fieldName: string) => {
+    if (fieldName === "id") {
+      return (document as any).id ?? (document as any).threadId ?? "";
+    }
     if (fieldName === "participants") {
       return (
         document.participants
-          ?.map((p) => `${p.name} ${(p as { email?: string }).email ?? ""}`)
+          ?.map((p) => {
+            const email = (p as { email?: string })?.email ?? "";
+            return `${p.name ?? ""} ${email}`.trim();
+          })
+          .filter(Boolean)
           .join(" ") ?? ""
       );
     }
-    return (document as Record<string, any>)[fieldName];
+    const val = (document as Record<string, any>)[fieldName];
+    if (typeof val === "string") return val;
+    if (val && typeof val === "object") {
+      return val.snippet ?? val.text ?? val.body ?? "";
+    }
+    return val != null ? String(val) : "";
   },
 
   searchOptions: {
@@ -74,32 +91,63 @@ function MailPage() {
   const { openCompose } = useCompose();
   const [searchQuery, setSearchQuery] = useState("");
   const deferQuery = useDeferredValue(searchQuery, "");
+  const queryRef = useRef(deferQuery);
+  queryRef.current = deferQuery;
 
   const { search, searchResults, clearSearch, removeAll, addAll } =
-    useMiniSearch<Thread>(emailThreads, MINI_SEARCH_OPTIONS);
+    useMiniSearch<Thread>(emailThreads ?? [], MINI_SEARCH_OPTIONS);
 
   const [sidebarWidth, setSidebarWidth] = useState(readSidebarWidth);
   const [resizingSidebar, setResizingSidebar] = useState(false);
   const dragStart = useRef({ x: 0, width: SIDEBAR_DEFAULT_WIDTH });
 
   useEffect(() => {
-    localStorage.setItem(SIDEBAR_WIDTH_KEY, String(sidebarWidth));
-  }, [sidebarWidth]);
+    if (resizingSidebar) return;
+    try {
+      localStorage.setItem(SIDEBAR_WIDTH_KEY, String(sidebarWidth));
+    } catch {}
+  }, [sidebarWidth, resizingSidebar]);
 
   useEffect(() => {
     if (!resizingSidebar) return;
 
+    const prevCursor = document.body.style.cursor;
+    const prevUserSelect = document.body.style.userSelect;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+
+    let rafId: number | null = null;
+    let latestClientX = 0;
+
     const handleMove = (event: PointerEvent) => {
-      const delta = event.clientX - dragStart.current.x;
-      setSidebarWidth(clampSidebarWidth(dragStart.current.width + delta));
+      latestClientX = event.clientX;
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        const delta = latestClientX - dragStart.current.x;
+        setSidebarWidth(clampSidebarWidth(dragStart.current.width + delta));
+        rafId = null;
+      });
     };
-    const stopResizing = () => setResizingSidebar(false);
+
+    const stopResizing = () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      setResizingSidebar(false);
+    };
 
     window.addEventListener("pointermove", handleMove);
     window.addEventListener("pointerup", stopResizing);
     window.addEventListener("pointercancel", stopResizing);
     window.addEventListener("blur", stopResizing);
+
     return () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+      document.body.style.cursor = prevCursor;
+      document.body.style.userSelect = prevUserSelect;
       window.removeEventListener("pointermove", handleMove);
       window.removeEventListener("pointerup", stopResizing);
       window.removeEventListener("pointercancel", stopResizing);
@@ -107,17 +155,22 @@ function MailPage() {
     };
   }, [resizingSidebar]);
 
-  const isFirstMount = useRef(true);
+  const prevThreadsRef = useRef(emailThreads);
   useEffect(() => {
-    if (isFirstMount.current) {
-      isFirstMount.current = false;
-      return;
-    }
+    if (prevThreadsRef.current === emailThreads) return;
+    prevThreadsRef.current = emailThreads;
+
     removeAll();
     if (emailThreads?.length) {
       addAll(emailThreads);
     }
-  }, [emailThreads, removeAll, addAll]);
+    const query = queryRef.current.trim();
+    if (query) {
+      startTransition(() => {
+        search(query);
+      });
+    }
+  }, [emailThreads, removeAll, addAll, search]);
 
   useEffect(() => {
     const query = deferQuery.trim();
@@ -132,34 +185,46 @@ function MailPage() {
     }
   }, [deferQuery, search, clearSearch]);
 
-  const startResize = (event: ReactPointerEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    dragStart.current = { x: event.clientX, width: sidebarWidth };
-    setResizingSidebar(true);
-  };
+  const startResize = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      dragStart.current = { x: event.clientX, width: sidebarWidth };
+      setResizingSidebar(true);
+    },
+    [sidebarWidth],
+  );
 
-  const resizeWithKeyboard = (event: ReactKeyboardEvent<HTMLDivElement>) => {
-    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
-    event.preventDefault();
-    const delta = event.key === "ArrowLeft" ? -16 : 16;
-    setSidebarWidth((width) => clampSidebarWidth(width + delta));
-  };
+  const resizeWithKeyboard = useCallback(
+    (event: ReactKeyboardEvent<HTMLDivElement>) => {
+      if (event.key === "Home") {
+        event.preventDefault();
+        setSidebarWidth(SIDEBAR_MIN_WIDTH);
+      } else if (event.key === "End") {
+        event.preventDefault();
+        setSidebarWidth(SIDEBAR_MAX_WIDTH);
+      } else if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+        event.preventDefault();
+        const delta = event.key === "ArrowLeft" ? -16 : 16;
+        setSidebarWidth((width) => clampSidebarWidth(width + delta));
+      }
+    },
+    [],
+  );
 
-  const thread = threadId ? getThread(threadId) : undefined;
+  const thread = !isDesktop && threadId ? getThread(threadId) : undefined;
+  const hasQuery = Boolean(deferQuery.trim());
 
   const filteredThreads = useMemo(() => {
-    if (!deferQuery.trim()) return emailThreads;
+    if (!hasQuery) return emailThreads ?? [];
     return searchResults ?? [];
-  }, [deferQuery, searchResults, emailThreads]);
+  }, [hasQuery, searchResults, emailThreads]);
 
   const list = (
     <ThreadList
       threads={filteredThreads}
       loading={loading}
-      emptyMessage={
-        deferQuery ? "No emails match your search" : "No emails yet"
-      }
-      onRefresh={deferQuery ? undefined : refreshActive}
+      emptyMessage={hasQuery ? "No emails match your search" : "No emails yet"}
+      onRefresh={hasQuery ? undefined : refreshActive}
       live={realtimeConnected}
       onPrefetch={prefetchMessages}
       selectedThreadId={threadId}
@@ -176,7 +241,7 @@ function MailPage() {
       onSearch={setSearchQuery}
       actions={
         isDesktop
-          ? [{ icon: EditIcon, label: "Compose", onClick: () => openCompose() }]
+          ? [{ icon: EditIcon, label: "Compose", onClick: openCompose }]
           : []
       }
     >
@@ -223,6 +288,7 @@ function MailPage() {
             tabIndex={0}
             onPointerDown={startResize}
             onKeyDown={resizeWithKeyboard}
+            onDoubleClick={() => setSidebarWidth(SIDEBAR_DEFAULT_WIDTH)}
             sx={{
               width: 6,
               flexShrink: 0,
@@ -230,6 +296,7 @@ function MailPage() {
               position: "relative",
               zIndex: 2,
               outline: "none",
+              touchAction: "none",
               "&::after": {
                 content: '""',
                 position: "absolute",
