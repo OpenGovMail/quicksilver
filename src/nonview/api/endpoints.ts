@@ -55,8 +55,7 @@ export const mailboxes = {
     const params = new URLSearchParams();
     if (opts.uidvalidity) params.set("uidvalidity", String(opts.uidvalidity));
     if (opts.limit) params.set("limit", String(opts.limit));
-    if (opts.known && opts.known.length)
-      params.set("known", opts.known.join(","));
+    if (opts.known?.length) params.set("known", opts.known.join(","));
     const qs = params.toString();
     const path = `${v1}/mailboxes/${encodeURIComponent(mailbox)}/changes${
       qs ? `?${qs}` : ""

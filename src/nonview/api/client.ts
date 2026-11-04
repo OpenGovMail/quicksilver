@@ -49,7 +49,7 @@ export class APIClient {
     }
     if (auth) {
       const tok = this.getToken();
-      if (tok) headers["Authorization"] = `Bearer ${tok}`;
+      if (tok) headers.Authorization = `Bearer ${tok}`;
     }
 
     const res = await fetch(`${this.baseURL}${path}`, {
@@ -98,7 +98,7 @@ export class APIClient {
   async getBlob(path: string, signal?: AbortSignal): Promise<Blob> {
     const headers: Record<string, string> = {};
     const tok = this.getToken();
-    if (tok) headers["Authorization"] = `Bearer ${tok}`;
+    if (tok) headers.Authorization = `Bearer ${tok}`;
 
     const res = await fetch(`${this.baseURL}${path}`, {
       method: "GET",
