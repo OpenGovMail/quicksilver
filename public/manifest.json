@@ -1,6 +1,15 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "id": "/quicksilver/",
+  "short_name": "Quicksilver",
+  "name": "Quicksilver — Email 2.0 Client",
+  "description": "Modern React & TypeScript email client bringing the Email 2.0 vision: conversational, offline-first, multilingual, and secure by design.",
+  "categories": ["productivity", "communication", "utilities"],
+  "start_url": "/quicksilver/",
+  "scope": "/quicksilver/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#00696F",
+  "background_color": "#ffffff",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,16 +19,36 @@
     {
       "src": "logo192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any"
     },
     {
       "src": "logo512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "shortcuts": [
+    {
+      "name": "Compose New Mail",
+      "short_name": "Compose",
+      "description": "Quickly write a new email",
+      "url": "/quicksilver/compose",
+      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Inbox",
+      "short_name": "Inbox",
+      "description": "Open your email conversations",
+      "url": "/quicksilver/",
+      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+    }
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "mailto",
+      "url": "/quicksilver/compose?to=%s"
+    }
+  ]
 }
