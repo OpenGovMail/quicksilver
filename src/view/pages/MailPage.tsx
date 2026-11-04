@@ -1,13 +1,32 @@
 import EditIcon from "@mui/icons-material/Edit";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import { Box, Fab, useMediaQuery, useTheme } from "@mui/material";
-import { useDeferredValue, useMemo, useState } from "react";
+import type {
+  KeyboardEvent as ReactKeyboardEvent,
+  PointerEvent as ReactPointerEvent,
+} from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { Outlet, useMatch } from "react-router-dom";
 import { useData } from "../../nonview/core/DataContext";
 import EmptyState from "../atoms/EmptyState";
 import AppLayout from "../moles/AppLayout";
 import { useCompose } from "../moles/ComposeProvider";
 import ThreadList from "../moles/ThreadList";
+
+const SIDEBAR_WIDTH_KEY = "quicksilver_sidebar_width";
+const SIDEBAR_MIN_WIDTH = 280;
+const SIDEBAR_MAX_WIDTH = 560;
+const SIDEBAR_DEFAULT_WIDTH = 360;
+
+function clampSidebarWidth(width: number): number {
+  return Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, width));
+}
+
+function readSidebarWidth(): number {
+  const stored = Number(localStorage.getItem(SIDEBAR_WIDTH_KEY));
+  if (!Number.isFinite(stored) || stored <= 0) return SIDEBAR_DEFAULT_WIDTH;
+  return clampSidebarWidth(stored);
+}
 
 function MailPage() {
   const theme = useTheme();
@@ -26,6 +45,48 @@ function MailPage() {
   const { openCompose } = useCompose();
   const [searchQuery, setSearchQuery] = useState("");
   const deferQuery = useDeferredValue(searchQuery, "");
+
+  const [sidebarWidth, setSidebarWidth] = useState(readSidebarWidth);
+  const [resizingSidebar, setResizingSidebar] = useState(false);
+  const dragStart = useRef({ x: 0, width: SIDEBAR_DEFAULT_WIDTH });
+
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_WIDTH_KEY, String(sidebarWidth));
+  }, [sidebarWidth]);
+
+  useEffect(() => {
+    if (!resizingSidebar) return;
+
+    const handleMove = (event: PointerEvent) => {
+      const delta = event.clientX - dragStart.current.x;
+      setSidebarWidth(clampSidebarWidth(dragStart.current.width + delta));
+    };
+    const stopResizing = () => setResizingSidebar(false);
+
+    window.addEventListener("pointermove", handleMove);
+    window.addEventListener("pointerup", stopResizing);
+    window.addEventListener("pointercancel", stopResizing);
+    window.addEventListener("blur", stopResizing);
+    return () => {
+      window.removeEventListener("pointermove", handleMove);
+      window.removeEventListener("pointerup", stopResizing);
+      window.removeEventListener("pointercancel", stopResizing);
+      window.removeEventListener("blur", stopResizing);
+    };
+  }, [resizingSidebar]);
+
+  const startResize = (event: ReactPointerEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    dragStart.current = { x: event.clientX, width: sidebarWidth };
+    setResizingSidebar(true);
+  };
+
+  const resizeWithKeyboard = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    event.preventDefault();
+    const delta = event.key === "ArrowLeft" ? -16 : 16;
+    setSidebarWidth((width) => clampSidebarWidth(width + delta));
+  };
 
   const thread = threadId ? getThread(threadId) : undefined;
 
@@ -75,6 +136,8 @@ function MailPage() {
           sx={(muiTheme) => ({
             display: "flex",
             height: "100%",
+            cursor: resizingSidebar ? "col-resize" : "default",
+            userSelect: resizingSidebar ? "none" : "auto",
             ...muiTheme.applyStyles("dark", {
               background:
                 "radial-gradient(circle at 50% 0%, #1A1A2E 0%, #0E0E0F 100%)",
@@ -85,7 +148,7 @@ function MailPage() {
               "The HUD Layer"). */}
           <Box
             sx={(muiTheme) => ({
-              width: 360,
+              width: sidebarWidth,
               borderRight: 1,
               borderColor: "divider",
               height: "100%",
@@ -99,6 +162,44 @@ function MailPage() {
           >
             {list}
           </Box>
+          <Box
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize mail list"
+            aria-valuemin={SIDEBAR_MIN_WIDTH}
+            aria-valuemax={SIDEBAR_MAX_WIDTH}
+            aria-valuenow={Math.round(sidebarWidth)}
+            tabIndex={0}
+            onPointerDown={startResize}
+            onKeyDown={resizeWithKeyboard}
+            sx={{
+              width: 6,
+              flexShrink: 0,
+              cursor: "col-resize",
+              position: "relative",
+              zIndex: 2,
+              outline: "none",
+              "&::after": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                bottom: 0,
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: 2,
+                borderRadius: 1,
+                backgroundColor: resizingSidebar ? "#00F2FF" : "transparent",
+                boxShadow: resizingSidebar
+                  ? "0 0 10px rgba(0, 242, 255, 0.5)"
+                  : "none",
+                transition: "background-color 0.15s, box-shadow 0.15s",
+              },
+              "&:hover::after, &:focus-visible::after": {
+                backgroundColor: "#00F2FF",
+                boxShadow: "0 0 10px rgba(0, 242, 255, 0.5)",
+              },
+            }}
+          />
           {/* Conversation pane: slightly more opaque surface so the two panes
               read as distinct glass layers. */}
           <Box
