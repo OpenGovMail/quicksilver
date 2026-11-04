@@ -5,13 +5,21 @@ import type {
   KeyboardEvent as ReactKeyboardEvent,
   PointerEvent as ReactPointerEvent,
 } from "react";
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import {
+  startTransition,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Outlet, useMatch } from "react-router-dom";
-import { useData } from "../../nonview/core/DataContext";
+import { type Thread, useData } from "../../nonview/core/DataContext";
 import EmptyState from "../atoms/EmptyState";
 import AppLayout from "../moles/AppLayout";
 import { useCompose } from "../moles/ComposeProvider";
 import ThreadList from "../moles/ThreadList";
+import { useMiniSearch } from "react-minisearch";
 
 const SIDEBAR_WIDTH_KEY = "quicksilver_sidebar_width";
 const SIDEBAR_MIN_WIDTH = 280;
@@ -27,6 +35,27 @@ function readSidebarWidth(): number {
   if (!Number.isFinite(stored) || stored <= 0) return SIDEBAR_DEFAULT_WIDTH;
   return clampSidebarWidth(stored);
 }
+
+const MINI_SEARCH_OPTIONS = {
+  fields: ["subject", "lastMessage", "participants"],
+
+  extractField: (document: Thread, fieldName: string) => {
+    if (fieldName === "participants") {
+      return (
+        document.participants
+          ?.map((p) => `${p.name} ${(p as { email?: string }).email ?? ""}`)
+          .join(" ") ?? ""
+      );
+    }
+    return (document as Record<string, any>)[fieldName];
+  },
+
+  searchOptions: {
+    prefix: true,
+    fuzzy: 0.2,
+    boost: { subject: 2 },
+  },
+};
 
 function MailPage() {
   const theme = useTheme();
@@ -45,6 +74,9 @@ function MailPage() {
   const { openCompose } = useCompose();
   const [searchQuery, setSearchQuery] = useState("");
   const deferQuery = useDeferredValue(searchQuery, "");
+
+  const { search, searchResults, clearSearch, removeAll, addAll } =
+    useMiniSearch<Thread>(emailThreads, MINI_SEARCH_OPTIONS);
 
   const [sidebarWidth, setSidebarWidth] = useState(readSidebarWidth);
   const [resizingSidebar, setResizingSidebar] = useState(false);
@@ -75,6 +107,31 @@ function MailPage() {
     };
   }, [resizingSidebar]);
 
+  const isFirstMount = useRef(true);
+  useEffect(() => {
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
+    removeAll();
+    if (emailThreads?.length) {
+      addAll(emailThreads);
+    }
+  }, [emailThreads, removeAll, addAll]);
+
+  useEffect(() => {
+    const query = deferQuery.trim();
+    if (query) {
+      startTransition(() => {
+        search(query);
+      });
+    } else {
+      startTransition(() => {
+        clearSearch();
+      });
+    }
+  }, [deferQuery, search, clearSearch]);
+
   const startResize = (event: ReactPointerEvent<HTMLDivElement>) => {
     event.preventDefault();
     dragStart.current = { x: event.clientX, width: sidebarWidth };
@@ -91,15 +148,9 @@ function MailPage() {
   const thread = threadId ? getThread(threadId) : undefined;
 
   const filteredThreads = useMemo(() => {
-    if (!deferQuery?.trim?.()) return emailThreads;
-    const query = deferQuery?.trim?.()?.toLowerCase?.();
-    return emailThreads.filter(
-      (thread) =>
-        thread.subject.toLowerCase().includes(query) ||
-        thread.lastMessage.toLowerCase().includes(query) ||
-        thread.participants.some((p) => p.name.toLowerCase().includes(query)),
-    );
-  }, [emailThreads, deferQuery]);
+    if (!deferQuery.trim()) return emailThreads;
+    return searchResults ?? [];
+  }, [deferQuery, searchResults, emailThreads]);
 
   const list = (
     <ThreadList
