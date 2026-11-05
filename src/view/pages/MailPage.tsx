@@ -92,7 +92,10 @@ function MailPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const deferQuery = useDeferredValue(searchQuery, "");
   const queryRef = useRef(deferQuery);
-  queryRef.current = deferQuery;
+
+  useEffect(() => {
+    queryRef.current = deferQuery;
+  }, [deferQuery]);
 
   const { search, searchResults, clearSearch, removeAll, addAll } =
     useMiniSearch<Thread>(emailThreads ?? [], MINI_SEARCH_OPTIONS);
