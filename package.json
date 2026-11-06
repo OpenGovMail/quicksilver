@@ -23,6 +23,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@hookform/resolvers": "^7.0.3",
     "@mui/icons-material": "^7.3.11",
     "@mui/material": "^7.3.11",
     "@mui/styled-engine-sc": "^7.3.10",
@@ -35,8 +36,10 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-email": "^6.11.6",
+    "react-hook-form": "8.0.0-beta.0",
     "react-router-dom": "^7.18.5",
-    "styled-components": "^6.6.0"
+    "styled-components": "^6.6.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.3",

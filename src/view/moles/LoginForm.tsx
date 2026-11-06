@@ -8,50 +8,48 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import ErrorMessage from "../atoms/ErrorMessage";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const loginSchema = z.object({
+  email: z.email("Email is invalid").min(1, "Email is required"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  rememberMe: z.boolean().default(false),
+});
+export type LoginFormData = z.infer<typeof loginSchema>;
+interface LoginFormProps {
+  onSubmit: (data: LoginFormData) => Promise<void>;
+  loading?: boolean;
+}
 
 const LoginForm = ({ onSubmit, loading = false }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState("");
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    control,
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+  });
 
-    if (!email) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Email is invalid";
-    }
-
-    if (!password) {
-      newErrors.password = "Password is required";
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onFormSubmit = async (data: LoginFormData) => {
     setFormError("");
-
-    if (!validateForm()) {
-      return;
-    }
-
     try {
-      await onSubmit({ email, password, rememberMe });
-    } catch (error) {
+      await onSubmit(data);
+    } catch (error: any) {
       setFormError(error.message || "Login failed. Please try again.");
     }
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: "100%" }}>
+    <Box
+      component="form"
+      onSubmit={handleSubmit(onFormSubmit)}
+      sx={{ mt: 1, width: "100%" }}
+    >
       {formError && (
         <Box sx={{ mb: 2 }}>
           <ErrorMessage
@@ -62,12 +60,11 @@ const LoginForm = ({ onSubmit, loading = false }) => {
       )}
 
       <TextField
+        {...register("email")}
         label="Email Address"
         type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
         error={!!errors.email}
-        helperText={errors.email}
+        helperText={errors.email?.message}
         autoComplete="email"
         required
         fullWidth
@@ -76,12 +73,11 @@ const LoginForm = ({ onSubmit, loading = false }) => {
       />
 
       <TextField
+        {...register("password")}
         label="Password"
         type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
         error={!!errors.password}
-        helperText={errors.password}
+        helperText={errors.password?.message}
         autoComplete="current-password"
         required
         fullWidth
@@ -89,14 +85,20 @@ const LoginForm = ({ onSubmit, loading = false }) => {
         sx={{ mb: 2 }}
       />
 
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
+      <Controller
+        name="rememberMe"
+        control={control}
+        render={({ field }) => (
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={!!field.value}
+                onChange={(e) => field.onChange(e.target.checked)}
+              />
+            }
+            label="Remember me"
           />
-        }
-        label="Remember me"
+        )}
       />
 
       <Button
