@@ -15,6 +15,9 @@ import type {
   RegistrationData,
 } from "../../nonview/core/accountStorage";
 import ErrorMessage from "../atoms/ErrorMessage";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, useWatch } from "react-hook-form";
 
 // Email service provider configurations
 // smtpSecure=true means implicit TLS (port 465);
@@ -61,6 +64,33 @@ const EMAIL_PROVIDERS = {
   },
 };
 
+type ProviderKey = keyof typeof EMAIL_PROVIDERS;
+
+const addAccountSchema = z.object({
+  name: z.string().trim().min(1, "Name is required"),
+  email: z.email("Email is invalid").min(1, "Email is required"),
+  emailServiceProvider: z.enum(["gmail", "outlook", "yahoo", "custom"]),
+  emailAddress: z
+    .email("Email address is invalid")
+    .min(1, "Email address for service is required"),
+  emailPassword: z.string().min(1, "Email service password is required"),
+  imapHost: z.string().min(1, "IMAP host is required"),
+  imapPort: z.number().int().positive("Must be a valid port"),
+  imapSecure: z.boolean(),
+  smtpHost: z.string().min(1, "SMTP host is required"),
+  smtpPort: z.number().int().positive("Must be a valid port"),
+  smtpSecure: z.boolean(),
+});
+
+export type AddAccountFormData = z.infer<typeof addAccountSchema>;
+
+interface AddAccountFormProps {
+  onSubmit: (data: RegistrationData) => Promise<LinkedAccount>;
+  loading?: boolean;
+  onSuccess: (account: LinkedAccount) => void;
+  successCtaLabel?: string;
+}
+
 type Step = 1 | 2 | "success";
 
 interface AddAccountFormProps {
@@ -78,137 +108,77 @@ const AddAccountForm = ({
   successCtaLabel = "Continue",
 }: AddAccountFormProps) => {
   const [step, setStep] = useState<Step>(1);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    emailServiceProvider: "gmail",
-    emailAddress: "",
-    emailPassword: "",
-    imapHost: EMAIL_PROVIDERS.gmail.imapHost,
-    imapPort: EMAIL_PROVIDERS.gmail.imapPort as number,
-    imapSecure: EMAIL_PROVIDERS.gmail.imapSecure,
-    smtpHost: EMAIL_PROVIDERS.gmail.smtpHost,
-    smtpPort: EMAIL_PROVIDERS.gmail.smtpPort as number,
-    smtpSecure: EMAIL_PROVIDERS.gmail.smtpSecure,
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
+
   const [formError, setFormError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
   const [createdAccount, setCreatedAccount] = useState<LinkedAccount | null>(
     null,
   );
 
-  const isBusy = loading || submitting;
+  const {
+    register,
+    handleSubmit,
+    trigger,
+    setValue,
+    control,
+    formState: { errors, isSubmitting },
+  } = useForm<AddAccountFormData>({
+    resolver: zodResolver(addAccountSchema),
 
-  const handleChange =
-    (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      let updates: Record<string, unknown> = { [field]: value };
+    shouldUnregister: false,
+    defaultValues: {
+      name: "",
+      email: "",
+      emailServiceProvider: "gmail",
+      emailAddress: "",
+      emailPassword: "",
+      imapHost: EMAIL_PROVIDERS.gmail.imapHost,
+      imapPort: EMAIL_PROVIDERS.gmail.imapPort,
+      imapSecure: EMAIL_PROVIDERS.gmail.imapSecure,
+      smtpHost: EMAIL_PROVIDERS.gmail.smtpHost,
+      smtpPort: EMAIL_PROVIDERS.gmail.smtpPort,
+      smtpSecure: EMAIL_PROVIDERS.gmail.smtpSecure,
+    },
+  });
 
-      // Auto-populate server settings when provider changes.
-      if (
-        field === "emailServiceProvider" &&
-        EMAIL_PROVIDERS[value as keyof typeof EMAIL_PROVIDERS]
-      ) {
-        const provider = EMAIL_PROVIDERS[value as keyof typeof EMAIL_PROVIDERS];
-        updates = {
-          ...updates,
-          imapHost: provider.imapHost,
-          imapPort: provider.imapPort,
-          imapSecure: provider.imapSecure,
-          smtpHost: provider.smtpHost,
-          smtpPort: provider.smtpPort,
-          smtpSecure: provider.smtpSecure,
-        };
-      }
+  const selectedProvider = useWatch({
+    control,
+    name: "emailServiceProvider",
+  });
 
-      setFormData((prev) => ({ ...prev, ...updates }));
-      if (errors[field]) {
-        setErrors((prev) => ({ ...prev, [field]: "" }));
-      }
-    };
-
-  const validateStep1 = (): boolean => {
-    const newErrors: Record<string, string> = {};
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-    }
-    if (!formData.email) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid";
-    }
-    setErrors((prev) => ({ ...prev, ...newErrors }));
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const validateStep2 = (): boolean => {
-    const newErrors: Record<string, string> = {};
-    if (!formData.emailAddress) {
-      newErrors.emailAddress = "Email address for service is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.emailAddress)) {
-      newErrors.emailAddress = "Email address is invalid";
-    }
-    if (!formData.emailPassword) {
-      newErrors.emailPassword = "Email service password is required";
-    }
-    if (!formData.imapHost) {
-      newErrors.imapHost = "IMAP host is required";
-    }
-    if (!formData.smtpHost) {
-      newErrors.smtpHost = "SMTP host is required";
-    }
-    setErrors((prev) => ({ ...prev, ...newErrors }));
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleContinue = () => {
+  const handleContinue = async () => {
     setFormError("");
-    if (validateStep1()) {
+    const isValid = await trigger(["name", "email"]);
+    if (isValid) {
       setStep(2);
     }
   };
 
-  const handleBack = () => {
+  const onComplete = async (data: AddAccountFormData) => {
     setFormError("");
-    setStep(1);
-  };
-
-  const handleComplete = async () => {
-    setFormError("");
-    if (!validateStep2()) return;
-
-    // Prepare the payload for submission
-    const payload = {
-      name: formData.name,
-      email: formData.email,
-      emailServiceProvider: formData.emailServiceProvider,
-      emailAddress: formData.emailAddress,
-      emailPassword: formData.emailPassword,
-      imapHost: formData.imapHost,
-      imapPort: parseInt(String(formData.imapPort), 10),
-      imapSecure: formData.imapSecure,
-      smtpHost: formData.smtpHost,
-      smtpPort: parseInt(String(formData.smtpPort), 10),
-      smtpSecure: formData.smtpSecure,
-    };
-
-    setSubmitting(true);
     try {
-      const account = await onSubmit(payload as RegistrationData);
+      const account = await onSubmit(data as unknown as RegistrationData);
       setCreatedAccount(account);
       setStep("success");
     } catch (error) {
       setFormError(
         (error as Error).message || "Registration failed. Please try again.",
       );
-    } finally {
-      setSubmitting(false);
     }
   };
 
+  const isBusy = loading || isSubmitting;
+
+  const handleBack = () => {
+    setFormError("");
+    setStep(1);
+  };
+
   return (
-    <Box sx={{ width: "100%" }}>
+    <Box
+      sx={{ width: "100%" }}
+      component="form"
+      onSubmit={handleSubmit(onComplete)}
+    >
       {step !== "success" && (
         <MobileStepper
           variant="dots"
@@ -242,12 +212,11 @@ const AddAccountForm = ({
           </Typography>
 
           <TextField
+            {...register("name")}
             label="Full Name"
             type="text"
-            value={formData.name}
-            onChange={handleChange("name")}
             error={!!errors.name}
-            helperText={errors.name}
+            helperText={errors.name?.message}
             autoComplete="name"
             required
             fullWidth
@@ -255,12 +224,11 @@ const AddAccountForm = ({
             disabled={isBusy}
           />
           <TextField
+            {...register("email")}
             label="Email Address"
             type="email"
-            value={formData.email}
-            onChange={handleChange("email")}
             error={!!errors.email}
-            helperText={errors.email}
+            helperText={errors.email?.message}
             autoComplete="email"
             required
             fullWidth
@@ -292,12 +260,24 @@ const AddAccountForm = ({
           <TextField
             select
             label="Email Service Provider"
-            value={formData.emailServiceProvider}
-            onChange={handleChange("emailServiceProvider")}
-            required
+            defaultValue="gmail"
             fullWidth
             variant="outlined"
             disabled={isBusy}
+            {...register("emailServiceProvider", {
+              onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                const providerKey = e.target.value as ProviderKey;
+                const provider = EMAIL_PROVIDERS[providerKey];
+                if (provider) {
+                  setValue("imapHost", provider.imapHost);
+                  setValue("imapPort", provider.imapPort);
+                  setValue("imapSecure", provider.imapSecure);
+                  setValue("smtpHost", provider.smtpHost);
+                  setValue("smtpPort", provider.smtpPort);
+                  setValue("smtpSecure", provider.smtpSecure);
+                }
+              },
+            })}
           >
             {Object.entries(EMAIL_PROVIDERS).map(([key, provider]) => (
               <MenuItem key={key} value={key}>
@@ -307,13 +287,12 @@ const AddAccountForm = ({
           </TextField>
 
           <TextField
+            {...register("emailAddress")}
             label="Email Address"
             type="email"
-            value={formData.emailAddress}
-            onChange={handleChange("emailAddress")}
             error={!!errors.emailAddress}
             helperText={
-              errors.emailAddress ||
+              errors.emailAddress?.message ||
               "Your actual email address (e.g., yourname@gmail.com)"
             }
             required
@@ -322,13 +301,12 @@ const AddAccountForm = ({
             disabled={isBusy}
           />
           <TextField
+            {...register("emailPassword")}
             label="Email Password / App Password"
             type="password"
-            value={formData.emailPassword}
-            onChange={handleChange("emailPassword")}
             error={!!errors.emailPassword}
             helperText={
-              errors.emailPassword ||
+              errors.emailPassword?.message ||
               "For Gmail/Outlook, use an app-specific password"
             }
             required
@@ -337,28 +315,28 @@ const AddAccountForm = ({
             disabled={isBusy}
           />
 
-          {formData.emailServiceProvider === "custom" && (
+          {selectedProvider === "custom" && (
             <>
               <Typography variant="subtitle2">
                 IMAP Settings (Incoming Mail)
               </Typography>
               <TextField
+                {...register("imapHost")}
                 label="IMAP Host"
                 type="text"
-                value={formData.imapHost}
-                onChange={handleChange("imapHost")}
                 error={!!errors.imapHost}
-                helperText={errors.imapHost}
+                helperText={errors.imapHost?.message}
                 required
                 fullWidth
                 variant="outlined"
                 disabled={isBusy}
               />
               <TextField
+                {...register("imapPort", { valueAsNumber: true })}
                 label="IMAP Port"
                 type="number"
-                value={formData.imapPort}
-                onChange={handleChange("imapPort")}
+                error={!!errors.imapPort}
+                helperText={errors.imapPort?.message}
                 required
                 fullWidth
                 variant="outlined"
@@ -369,22 +347,22 @@ const AddAccountForm = ({
                 SMTP Settings (Outgoing Mail)
               </Typography>
               <TextField
+                {...register("smtpHost")}
                 label="SMTP Host"
                 type="text"
-                value={formData.smtpHost}
-                onChange={handleChange("smtpHost")}
                 error={!!errors.smtpHost}
-                helperText={errors.smtpHost}
+                helperText={errors.smtpHost?.message}
                 required
                 fullWidth
                 variant="outlined"
                 disabled={isBusy}
               />
               <TextField
+                {...register("smtpPort", { valueAsNumber: true })}
                 label="SMTP Port"
                 type="number"
-                value={formData.smtpPort}
-                onChange={handleChange("smtpPort")}
+                error={!!errors.smtpPort}
+                helperText={errors.smtpPort?.message}
                 required
                 fullWidth
                 variant="outlined"
@@ -398,10 +376,10 @@ const AddAccountForm = ({
               Back
             </Button>
             <Button
+              type="submit"
               variant="contained"
               color="primary"
               fullWidth
-              onClick={handleComplete}
               disabled={isBusy}
               startIcon={isBusy ? <CircularProgress size={20} /> : null}
             >

@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import ErrorMessage from "../atoms/ErrorMessage";
-import z from "zod";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 
