@@ -17,6 +17,7 @@ import {
   type ReplyMode,
 } from "../../nonview/core/replyContext";
 import { plainTextToHtml } from "../../nonview/email/plainText";
+import { useHotkeys } from "@tanstack/react-hotkeys";
 
 function ThreadPage() {
   const { threadId } = useParams();
@@ -307,6 +308,25 @@ function ThreadPage() {
         new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
     );
   }, [messages, deletedMessages]);
+
+  const isModalOpen = replyMode !== null;
+  useHotkeys([
+    {
+      hotkey: "R",
+      callback: () => setReplyMode("reply"),
+      options: { enabled: !isModalOpen },
+    },
+    {
+      hotkey: "A",
+      callback: () => setReplyMode("replyAll"),
+      options: { enabled: !isModalOpen },
+    },
+    {
+      hotkey: "F",
+      callback: () => setReplyMode("forward"),
+      options: { enabled: !isModalOpen },
+    },
+  ]);
 
   if (loading && !thread) {
     return (
