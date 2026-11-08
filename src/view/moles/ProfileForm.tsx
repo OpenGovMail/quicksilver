@@ -8,8 +8,11 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import { useState } from "react";
 import ErrorMessage from "../atoms/ErrorMessage";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, type SubmitHandler, useForm, useWatch } from "react-hook-form";
 
 // Email service provider configurations
 const EMAIL_PROVIDERS = {
@@ -51,13 +54,73 @@ const EMAIL_PROVIDERS = {
   },
 };
 
+type ProviderKey = keyof typeof EMAIL_PROVIDERS;
+
+const profileSchema = z
+  .object({
+    name: z.string().trim().min(1, "Name is required"),
+    email: z
+      .email("Please enter a valid email address")
+      .trim()
+      .min(1, "Email is required"),
+    currentPassword: z.string().optional().default(""),
+    newPassword: z.string().optional().default(""),
+    confirmPassword: z.string().optional().default(""),
+    emailServiceProvider: z.enum(["gmail", "outlook", "yahoo", "custom"]),
+    emailPassword: z.string().optional().default(""),
+    imapHost: z.string().optional().default(""),
+    imapPort: z.coerce
+      .number()
+      .int("Port must be an integer")
+      .positive("Port must be a positive number"),
+    imapSecure: z.boolean().default(true),
+    smtpHost: z.string().optional().default(""),
+    smtpPort: z.coerce
+      .number()
+      .int("Port must be an integer")
+      .positive("Port must be a positive number"),
+    smtpSecure: z.boolean().default(true),
+  })
+  .superRefine((data, ctx) => {
+    const isChangingPassword = Boolean(
+      data.newPassword || data.confirmPassword,
+    );
+
+    if (isChangingPassword) {
+      if (!data.currentPassword) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["currentPassword"],
+          message: "Current password is required to change password",
+        });
+      }
+      if (data.newPassword !== data.confirmPassword) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["confirmPassword"],
+          message: "New passwords do not match",
+        });
+      }
+      if (data.newPassword && data.newPassword.length < 6) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["newPassword"],
+          message: "New password must be at least 6 characters",
+        });
+      }
+    }
+  });
+
+type ProfileFormInput = z.input<typeof profileSchema>;
+type ProfileFormOutput = z.output<typeof profileSchema>;
+
 /**
  * ProfileForm - Form for editing user profile
  * @param {object} user - User object with current values
  * @param {function} onSubmit - Submit callback
  */
 function ProfileForm({ user, onSubmit }) {
-  const [formData, setFormData] = useState({
+  const [_formData, setFormData] = useState({
     name: user.name || "",
     email: user.email || "",
     currentPassword: "",
@@ -76,113 +139,80 @@ function ProfileForm({ user, onSubmit }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const defaultProvider: ProviderKey =
+    (user.emailServiceProvider as ProviderKey) || "gmail";
+  const defaultProviderConfig =
+    EMAIL_PROVIDERS[defaultProvider] ?? EMAIL_PROVIDERS.gmail;
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    let updates: Record<string, any> = { [name]: value };
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    resetField,
+    formState: { errors, isSubmitting },
+  } = useForm<ProfileFormInput, unknown, ProfileFormOutput>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      name: user.name ?? "",
+      email: user.email ?? "",
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+      emailServiceProvider: defaultProvider,
+      emailPassword: user.emailPassword ?? "",
+      imapHost: user.imapHost ?? defaultProviderConfig.imapHost,
+      imapPort: user.imapPort ?? defaultProviderConfig.imapPort,
+      imapSecure: user.imapSecure ?? defaultProviderConfig.imapSecure,
+      smtpHost: user.smtpHost ?? defaultProviderConfig.smtpHost,
+      smtpPort: user.smtpPort ?? defaultProviderConfig.smtpPort,
+      smtpSecure: user.smtpSecure ?? defaultProviderConfig.smtpSecure,
+    },
+  });
+  const selectedProvider = useWatch({
+    control,
+    name: "emailServiceProvider",
+  });
 
-    // Auto-populate server settings when provider changes
-    if (name === "emailServiceProvider" && EMAIL_PROVIDERS[value]) {
-      const provider = EMAIL_PROVIDERS[value];
-      updates = {
-        ...updates,
-        imapHost: provider.imapHost,
-        imapPort: provider.imapPort,
-        imapSecure: provider.imapSecure,
-        smtpHost: provider.smtpHost,
-        smtpPort: provider.smtpPort,
-        smtpSecure: provider.smtpSecure,
-      };
-    }
-
-    setFormData((prev) => ({ ...prev, ...updates }));
+  const onValidSubmit: SubmitHandler<ProfileFormOutput> = async (data) => {
     setError("");
     setSuccess("");
-  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
-
-    // Basic validation
-    if (!formData.name.trim()) {
-      setError("Name is required");
-      return;
-    }
-
-    if (!formData.email.trim()) {
-      setError("Email is required");
-      return;
-    }
-
-    // Email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setError("Please enter a valid email address");
-      return;
-    }
-
-    // Password validation (if changing password)
-    if (formData.newPassword || formData.confirmPassword) {
-      if (!formData.currentPassword) {
-        setError("Current password is required to change password");
-        return;
-      }
-      if (formData.newPassword !== formData.confirmPassword) {
-        setError("New passwords do not match");
-        return;
-      }
-      if (formData.newPassword.length < 6) {
-        setError("New password must be at least 6 characters");
-        return;
-      }
-    }
-
-    setLoading(true);
     try {
-      // Prepare update data
-      const updateData: Record<string, any> = {
-        name: formData.name,
-        email: formData.email,
-        // Email service configuration
-        emailServiceProvider: formData.emailServiceProvider,
-        emailPassword: formData.emailPassword,
-        imapHost: formData.imapHost,
-        imapPort: parseInt(String(formData.imapPort), 10),
-        imapSecure: formData.imapSecure,
-        smtpHost: formData.smtpHost,
-        smtpPort: parseInt(String(formData.smtpPort), 10),
-        smtpSecure: formData.smtpSecure,
+      const updateData: Record<string, unknown> = {
+        name: data.name,
+        email: data.email,
+        emailServiceProvider: data.emailServiceProvider,
+        emailPassword: data.emailPassword,
+        imapHost: data.imapHost,
+        imapPort: Number(data.imapPort),
+        imapSecure: data.imapSecure,
+        smtpHost: data.smtpHost,
+        smtpPort: Number(data.smtpPort),
+        smtpSecure: data.smtpSecure,
       };
 
-      // Only include password fields if changing password
-      if (formData.newPassword) {
-        updateData.currentPassword = formData.currentPassword;
-        updateData.newPassword = formData.newPassword;
+      if (data.newPassword) {
+        updateData.currentPassword = data.currentPassword;
+        updateData.newPassword = data.newPassword;
       }
 
       await onSubmit(updateData);
       setSuccess("Profile updated successfully");
 
-      // Clear password fields after successful update
-      setFormData((prev) => ({
-        ...prev,
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      }));
-    } catch (err) {
-      setError(err.message || "Failed to update profile");
-    } finally {
-      setLoading(false);
+      // Reset sensitive password fields after success
+      resetField("currentPassword", { defaultValue: "" });
+      resetField("newPassword", { defaultValue: "" });
+      resetField("confirmPassword", { defaultValue: "" });
+    } catch (err: any) {
+      setServerError(err.message || "Failed to update profile");
     }
   };
 
   return (
     <Box
       component="form"
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onValidSubmit)}
       sx={{ maxWidth: 500, mx: "auto", px: 2 }}
     >
       <Stack spacing={3}>
@@ -199,63 +229,65 @@ function ProfileForm({ user, onSubmit }) {
 
         <TextField
           label="Name"
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          disabled={loading}
+          autoComplete="name"
           fullWidth
           variant="outlined"
+          disabled={isSubmitting}
+          {...register("name")}
+          error={Boolean(errors.name)}
+          helperText={errors.name?.message}
         />
 
         <TextField
           label="Email Address"
           type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          helperText="Your actual email address (e.g., yourname@gmail.com)"
-          disabled={loading}
           fullWidth
           variant="outlined"
+          disabled={isSubmitting}
+          {...register("email")}
+          error={Boolean(errors.email)}
+          helperText={
+            errors.email?.message ||
+            "Your actual email address (e.g., yourname@gmail.com)"
+          }
         />
 
         <Box sx={{ pt: 2, borderTop: 1, borderColor: "divider" }}>
           <TextField
             label="Current Password"
             type="password"
-            name="currentPassword"
-            value={formData.currentPassword}
-            onChange={handleChange}
             placeholder="Enter current password to change"
-            disabled={loading}
             fullWidth
             variant="outlined"
+            disabled={isSubmitting}
+            {...register("currentPassword")}
+            error={Boolean(errors.currentPassword)}
+            helperText={errors.currentPassword?.message}
           />
         </Box>
 
         <TextField
           label="New Password"
           type="password"
-          name="newPassword"
-          value={formData.newPassword}
-          onChange={handleChange}
           placeholder="Leave blank to keep current password"
-          disabled={loading}
           fullWidth
           variant="outlined"
+          disabled={isSubmitting}
+          {...register("newPassword")}
+          error={Boolean(errors.newPassword)}
+          helperText={errors.newPassword?.message}
         />
 
         <TextField
           label="Confirm New Password"
           type="password"
-          name="confirmPassword"
-          value={formData.confirmPassword}
-          onChange={handleChange}
           placeholder="Confirm new password"
-          disabled={loading}
           fullWidth
           variant="outlined"
+          disabled={isSubmitting}
+          {...register("confirmPassword")}
+          error={Boolean(errors.confirmPassword)}
+          helperText={errors.confirmPassword?.message}
         />
 
         <Divider sx={{ my: 2 }} />
@@ -263,36 +295,68 @@ function ProfileForm({ user, onSubmit }) {
           Email Service Configuration
         </Typography>
 
-        <TextField
-          select
-          label="Email Service Provider"
+        <Controller
           name="emailServiceProvider"
-          value={formData.emailServiceProvider}
-          onChange={handleChange}
-          disabled={loading}
-          fullWidth
-          variant="outlined"
-        >
-          {Object.entries(EMAIL_PROVIDERS).map(([key, provider]) => (
-            <MenuItem key={key} value={key}>
-              {provider.name}
-            </MenuItem>
-          ))}
-        </TextField>
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              select
+              label="Email Service Provider"
+              disabled={isSubmitting}
+              fullWidth
+              variant="outlined"
+              error={Boolean(errors.emailServiceProvider)}
+              helperText={errors.emailServiceProvider?.message}
+              onChange={(e) => {
+                const val = e.target.value as ProviderKey;
+                field.onChange(val);
+
+                // Auto-fill server presets on provider change
+                const provider = EMAIL_PROVIDERS[val];
+                if (provider) {
+                  setValue("imapHost", provider.imapHost, {
+                    shouldDirty: true,
+                  });
+                  setValue("imapPort", provider.imapPort, {
+                    shouldDirty: true,
+                  });
+                  setValue("imapSecure", provider.imapSecure, {
+                    shouldDirty: true,
+                  });
+                  setValue("smtpHost", provider.smtpHost, {
+                    shouldDirty: true,
+                  });
+                  setValue("smtpPort", provider.smtpPort, {
+                    shouldDirty: true,
+                  });
+                  setValue("smtpSecure", provider.smtpSecure, {
+                    shouldDirty: true,
+                  });
+                }
+              }}
+            >
+              {Object.entries(EMAIL_PROVIDERS).map(([key, provider]) => (
+                <MenuItem key={key} value={key}>
+                  {provider.name}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
+        />
 
         <TextField
           label="Email Password / App Password"
           type="password"
-          name="emailPassword"
-          value={formData.emailPassword}
-          onChange={handleChange}
           helperText="For Gmail/Outlook, use an app-specific password"
-          disabled={loading}
+          disabled={isSubmitting}
           fullWidth
           variant="outlined"
+          {...register("emailPassword")}
+          error={Boolean(errors.emailPassword)}
         />
 
-        {formData.emailServiceProvider === "custom" && (
+        {selectedProvider === "custom" && (
           <>
             <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>
               IMAP Settings (Incoming Mail)
@@ -300,22 +364,22 @@ function ProfileForm({ user, onSubmit }) {
             <TextField
               label="IMAP Host"
               type="text"
-              name="imapHost"
-              value={formData.imapHost}
-              onChange={handleChange}
-              disabled={loading}
+              disabled={isSubmitting}
               fullWidth
               variant="outlined"
+              {...register("imapHost")}
+              error={Boolean(errors.imapHost)}
+              helperText={errors.imapHost?.message}
             />
             <TextField
               label="IMAP Port"
               type="number"
-              name="imapPort"
-              value={formData.imapPort}
-              onChange={handleChange}
-              disabled={loading}
+              disabled={isSubmitting}
               fullWidth
               variant="outlined"
+              {...register("imapPort", { valueAsNumber: true })}
+              error={Boolean(errors.imapPort)}
+              helperText={errors.imapPort?.message}
             />
 
             <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>
@@ -324,22 +388,22 @@ function ProfileForm({ user, onSubmit }) {
             <TextField
               label="SMTP Host"
               type="text"
-              name="smtpHost"
-              value={formData.smtpHost}
-              onChange={handleChange}
-              disabled={loading}
+              disabled={isSubmitting}
               fullWidth
               variant="outlined"
+              {...register("smtpHost")}
+              error={Boolean(errors.smtpHost)}
+              helperText={errors.smtpHost?.message}
             />
             <TextField
               label="SMTP Port"
               type="number"
-              name="smtpPort"
-              value={formData.smtpPort}
-              onChange={handleChange}
-              disabled={loading}
+              disabled={isSubmitting}
               fullWidth
               variant="outlined"
+              {...register("smtpPort", { valueAsNumber: true })}
+              error={Boolean(errors.smtpPort)}
+              helperText={errors.smtpPort?.message}
             />
           </>
         )}
@@ -348,8 +412,8 @@ function ProfileForm({ user, onSubmit }) {
           type="submit"
           variant="contained"
           color="primary"
-          disabled={loading}
-          startIcon={loading ? <CircularProgress size={20} /> : null}
+          disabled={isSubmitting}
+          startIcon={isSubmitting ? <CircularProgress size={20} /> : null}
           fullWidth
         >
           Save Changes
