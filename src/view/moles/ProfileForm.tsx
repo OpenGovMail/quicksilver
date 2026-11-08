@@ -12,7 +12,12 @@ import { useState } from "react";
 import ErrorMessage from "../atoms/ErrorMessage";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, type SubmitHandler, useForm, useWatch } from "react-hook-form";
+import {
+  Controller,
+  type SubmitHandler,
+  useForm,
+  useWatch,
+} from "react-hook-form";
 
 // Email service provider configurations
 const EMAIL_PROVIDERS = {
@@ -120,25 +125,9 @@ type ProfileFormOutput = z.output<typeof profileSchema>;
  * @param {function} onSubmit - Submit callback
  */
 function ProfileForm({ user, onSubmit }) {
-  const [_formData, setFormData] = useState({
-    name: user.name || "",
-    email: user.email || "",
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-    // Email service configuration
-    emailServiceProvider: user.emailServiceProvider || "gmail",
-    emailPassword: user.emailPassword || "",
-    imapHost: user.imapHost || EMAIL_PROVIDERS.gmail.imapHost,
-    imapPort: user.imapPort || EMAIL_PROVIDERS.gmail.imapPort,
-    imapSecure: user.imapSecure ?? EMAIL_PROVIDERS.gmail.imapSecure,
-    smtpHost: user.smtpHost || EMAIL_PROVIDERS.gmail.smtpHost,
-    smtpPort: user.smtpPort || EMAIL_PROVIDERS.gmail.smtpPort,
-    smtpSecure: user.smtpSecure ?? EMAIL_PROVIDERS.gmail.smtpSecure,
-  });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [loading, setLoading] = useState(false);
+
   const defaultProvider: ProviderKey =
     (user.emailServiceProvider as ProviderKey) || "gmail";
   const defaultProviderConfig =
@@ -205,7 +194,7 @@ function ProfileForm({ user, onSubmit }) {
       resetField("newPassword", { defaultValue: "" });
       resetField("confirmPassword", { defaultValue: "" });
     } catch (err: any) {
-      setServerError(err.message || "Failed to update profile");
+      setError(err.message || "Failed to update profile");
     }
   };
 
