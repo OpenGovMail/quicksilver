@@ -4,8 +4,9 @@ import {
   CssBaseline,
   ThemeProvider,
 } from "@mui/material";
-import { lazy, Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { lazy, startTransition, Suspense } from "react";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { useHotkeys } from "@tanstack/react-hotkeys";
 import { AccountProvider } from "./nonview/core/AccountContext";
 import { AuthProvider } from "./nonview/core/AuthContext";
 import { DataProvider } from "./nonview/core/DataContext";
@@ -38,6 +39,21 @@ const RouteFallback = () => (
     <CircularProgress />
   </Box>
 );
+
+const HotKeys = (): null => {
+  const navigate = useNavigate();
+  const navigatePath = (path: string) => {
+    startTransition(() => navigate(path));
+  };
+
+  useHotkeys([
+    { hotkey: ["G", "L"], callback: () => navigatePath("/login") },
+    { hotkey: ["G", "I"], callback: () => navigatePath("/inbox") },
+    { hotkey: ["G", "P"], callback: () => navigatePath("/profile") },
+    { hotkey: "C", callback: () => navigatePath("/compose") },
+  ]);
+  return null;
+};
 
 function App() {
   return (
@@ -136,6 +152,7 @@ function App() {
                 {/* 404 Not Found - catch all */}
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
+              <HotKeys />
             </ComposeProvider>
           </DataProvider>
         </AccountProvider>
