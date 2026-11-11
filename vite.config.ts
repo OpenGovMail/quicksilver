@@ -9,7 +9,11 @@ export default defineConfig(({ mode }) => {
   const apiTarget = env.VITE_API_PROXY_TARGET || "http://localhost:8080";
 
   return {
-    plugins: [react()],
+    plugins: [
+      react({
+        compiler: true,
+      }),
+    ],
     base: "/quicksilver/",
     server: {
       port: 3000,

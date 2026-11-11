@@ -93,9 +93,8 @@ const MessageBubble = ({
       urlRef.current = url;
       setPreview((p) => (p ? { ...p, url, loading: false } : p));
     } catch (e) {
-      setPreview((p) =>
-        p ? { ...p, loading: false, error: e?.message || "Preview failed" } : p,
-      );
+      const errorMsg = e?.message || "Preview failed";
+      setPreview((p) => (p ? { ...p, loading: false, error: errorMsg } : p));
     }
   };
 

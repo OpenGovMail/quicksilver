@@ -26,9 +26,8 @@ function LoginPage() {
       navigate("/");
     } catch (error) {
       throw error;
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   return (
