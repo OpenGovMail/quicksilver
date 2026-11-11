@@ -5,12 +5,19 @@ import AppLayout from "../moles/AppLayout";
 import ComposePanel from "../moles/ComposePanel";
 
 const parseRecipients = (toParam: string | null): Address[] => {
-  if (!toParam) return [];
-  return toParam
-    .split(",")
-    .map((email) => email.trim())
-    .filter(Boolean)
-    .map((email) => ({ email }));
+  if (!toParam?.trim()) return [];
+
+  const recipients: Address[] = [];
+  const parts = toParam.split(",");
+
+  for (const part of parts) {
+    const email = part.trim();
+    if (email) {
+      recipients.push({ email });
+    }
+  }
+
+  return recipients;
 };
 
 function ComposePage() {

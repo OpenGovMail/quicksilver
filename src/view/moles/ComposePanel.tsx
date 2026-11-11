@@ -14,6 +14,9 @@ import AttachmentList from "./AttachmentList";
 import ComposeForm from "./ComposeForm";
 import ComposeHeader from "./ComposeHeader";
 import type { RecipientInputHandle } from "./RecipientInput";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, useWatch } from "react-hook-form";
 
 type ComposeMode = "plaintext" | "template";
 
@@ -57,6 +60,18 @@ interface ComposePanelProps {
   onSavedDraft?: () => void;
 }
 
+export const composeSchema = z.object({
+  recipients: z.array(z.any()).min(1, "Please enter at least one recipient"),
+  subject: z.string(),
+  body: z.string(),
+  attachments: z.array(z.any()),
+  mode: z.enum(["plaintext", "template"]),
+  templateId: z.string().nullable(),
+  templateValues: z.record(z.string(), z.any()),
+});
+
+export type ComposeFormValues = z.infer<typeof composeSchema>;
+
 // The full compose surface (header + form + attachments) with all of its state
 // and send/draft logic. Rendered full-page by ComposePage and inside a modal by
 // ComposeDialog, so replies and new messages share one implementation.
@@ -72,33 +87,34 @@ const ComposePanel = ({
 }: ComposePanelProps) => {
   const { contacts, sendEmail, saveDraft } = useData();
 
-  const [recipients, setRecipients] = useState<Address[]>(initial?.to || []);
-  const [subject, setSubject] = useState(initial?.subject || "");
-  const [body, setBody] = useState(initial?.body || "");
-  const [attachments, setAttachments] = useState<any[]>([]);
-
-  // Template (react-email) composition state.
-  const [mode, setMode] = useState<ComposeMode>("plaintext");
-  const [templateId, setTemplateId] = useState<string | null>(null);
-  const [templateValues, setTemplateValues] = useState<TemplateValues>({});
+  const { register, control, handleSubmit, getValues, setValue } =
+    useForm<ComposeFormValues>({
+      resolver: zodResolver(composeSchema),
+      defaultValues: {
+        recipients: initial?.to || [],
+        subject: initial?.subject || "",
+        body: initial?.body || "",
+        attachments: [],
+        mode: "plaintext",
+        templateId: null,
+        templateValues: {},
+      },
+    });
+  const attachments = useWatch({ control, name: "attachments" });
 
   const recipientInputRef = useRef<RecipientInputHandle | null>(null);
   const contactSuggestions = useMemo(() => contacts || [], [contacts]);
 
   const handleTemplateSelect = (template: EmailTemplate) => {
-    setTemplateId(template.id);
-    setTemplateValues(defaultValues(template));
-    if (!subject.trim() && template.subject) {
+    setValue("templateId", template.id);
+    const defaults = defaultValues(template);
+    setValue("templateValues", defaults);
+    const currentSubject = getValues("subject");
+    if (!currentSubject.trim() && template.subject) {
       const suggested = template.subject(defaultValues(template));
-      if (suggested) setSubject(suggested);
+      if (suggested) setValue("subject", suggested);
     }
   };
-
-  const handleTemplateValueChange = (key: string, value: string) => {
-    setTemplateValues((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleChangeTemplate = () => setTemplateId(null);
 
   const handleAttachFiles = (files: File[]) => {
     const newAttachments = files.map((file) => ({
@@ -108,11 +124,17 @@ const ComposePanel = ({
       type: file.type,
       url: URL.createObjectURL(file),
     }));
-    setAttachments((prev) => [...prev, ...newAttachments]);
+    setValue("attachments", [...getValues("attachments"), ...newAttachments], {
+      shouldDirty: true,
+    });
   };
 
   const handleRemoveAttachment = (id: string) => {
-    setAttachments((prev) => prev.filter((a) => a.id !== id));
+    setValue(
+      "attachments",
+      getValues("attachments").filter((a: any) => a.id !== id),
+      { shouldDirty: true },
+    );
   };
 
   // Assemble the outgoing bodies plus a display summary for the thread view.
@@ -120,9 +142,12 @@ const ComposePanel = ({
   //   - content / contentHtml: how the sent message should render in-thread
   // The quoted original (if replying) is appended to what the user wrote, with
   // its HTML preserved so a plain-text reply still quotes real HTML.
-  const buildBody = async () => {
-    if (mode === "template" && templateId) {
-      const { html, text } = await renderTemplate(templateId, templateValues);
+  const buildBody = async (data: ComposeFormValues) => {
+    if (data.mode === "template" && data.templateId) {
+      const { html, text } = await renderTemplate(
+        data.templateId,
+        data.templateValues,
+      );
       return {
         textToSend: quote ? `${text}\n\n${quote.text}` : text,
         htmlToSend: html,
@@ -130,59 +155,60 @@ const ComposePanel = ({
         contentHtml: html,
       };
     }
-    const baseHtml = body.trim() ? plainTextToHtml(body) : "";
+    const baseHtml = data.body.trim() ? plainTextToHtml(data.body) : "";
     return {
-      textToSend: quote ? `${body}\n\n${quote.text}` : body,
+      textToSend: quote ? `${data.body}\n\n${quote.text}` : data.body,
       htmlToSend: quote ? baseHtml + quote.html : baseHtml || undefined,
       // Show just the user's own text as a chat bubble in the thread.
-      content: body,
-      contentHtml: undefined as string | undefined,
+      content: data.body,
+      contentHtml: undefined,
     };
   };
 
-  const effectiveSubject = () => {
-    if (subject.trim()) return subject;
-    if (mode === "template" && templateId) {
-      const t = getTemplate(templateId);
-      return t?.subject?.(templateValues) || subject;
+  const effectiveSubject = (data: ComposeFormValues) => {
+    if (data.subject.trim()) return data.subject;
+    if (data.mode === "template" && data.templateId) {
+      const t = getTemplate(data.templateId);
+      return t?.subject?.(data.templateValues) || data.subject;
     }
-    return subject;
+    return data.subject;
   };
 
-  const handleSend = async () => {
-    const finalRecipients =
-      recipientInputRef.current?.flushPending() ?? recipients;
-    if (finalRecipients.length === 0) {
-      throw new Error("Please enter at least one recipient");
-    }
-    const finalSubject = effectiveSubject();
-    const built = await buildBody();
-    await sendEmail({
-      to: finalRecipients,
-      subject: finalSubject,
-      body: built.textToSend,
-      bodyHtml: built.htmlToSend,
-      attachments,
-      inReplyTo: threadContext?.inReplyTo,
-      references: threadContext?.references,
-    });
-    onSent({
-      content: built.content,
-      contentHtml: built.contentHtml,
-      subject: finalSubject,
-    });
+  const handleSend = () => {
+    const flushed = recipientInputRef.current?.flushPending();
+    if (flushed) setValue("recipients", flushed);
+
+    return handleSubmit(async (data) => {
+      const finalSubject = effectiveSubject(data);
+      const built = await buildBody(data);
+      await sendEmail({
+        to: data.recipients,
+        subject: finalSubject,
+        body: built.textToSend,
+        bodyHtml: built.htmlToSend,
+        attachments: data.attachments,
+        inReplyTo: threadContext?.inReplyTo,
+        references: threadContext?.references,
+      });
+      onSent({
+        content: built.content,
+        contentHtml: built.contentHtml,
+        subject: finalSubject,
+      });
+    })();
   };
 
   const handleSaveDraft = async () => {
-    const finalRecipients =
-      recipientInputRef.current?.flushPending() ?? recipients;
-    const finalSubject = effectiveSubject();
-    const built = await buildBody();
+    const flushed = recipientInputRef.current?.flushPending();
+    if (flushed) setValue("recipients", flushed);
+    const data = getValues();
+    const finalSubject = effectiveSubject(data);
+    const built = await buildBody(data);
     await saveDraft({
-      to: finalRecipients,
+      to: data.recipients,
       subject: finalSubject,
       body: built.textToSend,
-      attachments,
+      attachments: data.attachments,
     });
     (
       onSavedDraft ||
@@ -200,24 +226,14 @@ const ComposePanel = ({
       />
       <Box sx={{ flex: 1, overflow: "auto" }}>
         <ComposeForm
-          recipients={recipients}
-          onRecipientsChange={setRecipients}
+          control={control}
+          setValue={setValue}
           recipientInputRef={recipientInputRef}
-          subject={subject}
-          onSubjectChange={setSubject}
-          body={body}
-          onBodyChange={setBody}
           onAttachFiles={handleAttachFiles}
           onSaveDraft={handleSaveDraft}
           onDiscard={onClose}
           contacts={contactSuggestions}
-          mode={mode}
-          onModeChange={setMode}
-          templateId={templateId}
-          templateValues={templateValues}
           onTemplateSelect={handleTemplateSelect}
-          onTemplateValueChange={handleTemplateValueChange}
-          onChangeTemplate={handleChangeTemplate}
         />
         <AttachmentList
           attachments={attachments}

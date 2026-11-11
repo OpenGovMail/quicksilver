@@ -9,6 +9,9 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import ErrorMessage from "../atoms/ErrorMessage";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, useWatch } from "react-hook-form";
 
 // Email service provider configurations
 // smtpSecure=true means implicit TLS (port 465); smtpSecure=false means
@@ -54,130 +57,86 @@ const EMAIL_PROVIDERS = {
   },
 } as const;
 
-const RegistrationForm = ({ onSubmit, loading = false }) => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    // Email service connection parameters
-    emailServiceProvider: "gmail",
-    emailAddress: "",
-    emailPassword: "",
-    imapHost: EMAIL_PROVIDERS.gmail.imapHost,
-    imapPort: EMAIL_PROVIDERS.gmail.imapPort,
-    imapSecure: EMAIL_PROVIDERS.gmail.imapSecure,
-    smtpHost: EMAIL_PROVIDERS.gmail.smtpHost,
-    smtpPort: EMAIL_PROVIDERS.gmail.smtpPort,
-    smtpSecure: EMAIL_PROVIDERS.gmail.smtpSecure,
+const registrationSchema = z
+  .object({
+    name: z.string().trim().min(1, "Name is required"),
+    email: z.email("Email is invalid").min(1, "Email is required").trim(),
+    password: z
+      .string()
+      .min(1, "Password is required")
+      .min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+    emailServiceProvider: z.enum(["gmail", "outlook", "yahoo", "custom"]),
+    emailAddress: z
+      .email("Email address is invalid")
+      .min(1, "Email address for service is required"),
+    emailPassword: z.string().min(1, "Email service password is required"),
+    imapHost: z.string().min(1, "IMAP host is required"),
+    imapPort: z.number().int().positive("Must be a valid port"),
+    imapSecure: z.boolean(),
+    smtpHost: z.string().min(1, "SMTP host is required"),
+    smtpPort: z.number().int().positive("Must be a valid port"),
+    smtpSecure: z.boolean(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
   });
-  const [errors, setErrors] = useState<Record<string, string>>({});
+
+export type RegistrationFormData = z.infer<typeof registrationSchema>;
+
+interface RegistrationFormProps {
+  onSubmit: (data: RegistrationFormData) => Promise<void>;
+  loading?: boolean;
+}
+
+const RegistrationForm = ({ onSubmit, loading = false }) => {
   const [formError, setFormError] = useState("");
 
-  const handleChange = (field) => (e) => {
-    const value = e.target.value;
-    let updates: Record<string, any> = { [field]: value };
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    control,
+    formState: { errors },
+  } = useForm<RegistrationFormData>({
+    resolver: zodResolver(registrationSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      emailServiceProvider: "gmail",
+      emailAddress: "",
+      emailPassword: "",
+      imapHost: EMAIL_PROVIDERS.gmail.imapHost,
+      imapPort: EMAIL_PROVIDERS.gmail.imapPort,
+      imapSecure: EMAIL_PROVIDERS.gmail.imapSecure,
+      smtpHost: EMAIL_PROVIDERS.gmail.smtpHost,
+      smtpPort: EMAIL_PROVIDERS.gmail.smtpPort,
+      smtpSecure: EMAIL_PROVIDERS.gmail.smtpSecure,
+    },
+  });
 
-    // Auto-populate server settings when provider changes
-    if (field === "emailServiceProvider" && EMAIL_PROVIDERS[value]) {
-      const provider = EMAIL_PROVIDERS[value];
-      updates = {
-        ...updates,
-        imapHost: provider.imapHost,
-        imapPort: provider.imapPort,
-        imapSecure: provider.imapSecure,
-        smtpHost: provider.smtpHost,
-        smtpPort: provider.smtpPort,
-        smtpSecure: provider.smtpSecure,
-      };
-    }
-
-    setFormData({ ...formData, ...updates });
-    // Clear error for this field when user types
-    if (errors[field]) {
-      setErrors({ ...errors, [field]: "" });
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-    }
-
-    if (!formData.email) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid";
-    }
-
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    }
-
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Please confirm your password";
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
-    }
-
-    // Email service validation
-    if (!formData.emailAddress) {
-      newErrors.emailAddress = "Email address for service is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.emailAddress)) {
-      newErrors.emailAddress = "Email address is invalid";
-    }
-
-    if (!formData.emailPassword) {
-      newErrors.emailPassword = "Email service password is required";
-    }
-
-    if (!formData.imapHost) {
-      newErrors.imapHost = "IMAP host is required";
-    }
-
-    if (!formData.smtpHost) {
-      newErrors.smtpHost = "SMTP host is required";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const selectedProvider = useWatch({
+    control,
+    name: "emailServiceProvider",
+  });
+  const onFormSubmit = async (data: RegistrationFormData) => {
     setFormError("");
-
-    if (!validateForm()) {
-      return;
-    }
-
     try {
-      await onSubmit({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        // Email service configuration
-        emailServiceProvider: formData.emailServiceProvider,
-        emailAddress: formData.emailAddress,
-        emailPassword: formData.emailPassword,
-        imapHost: formData.imapHost,
-        imapPort: parseInt(String(formData.imapPort), 10),
-        imapSecure: formData.imapSecure,
-        smtpHost: formData.smtpHost,
-        smtpPort: parseInt(String(formData.smtpPort), 10),
-        smtpSecure: formData.smtpSecure,
-      });
-    } catch (error) {
+      await onSubmit(data);
+    } catch (error: any) {
       setFormError(error.message || "Registration failed. Please try again.");
     }
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: "100%" }}>
+    <Box
+      component="form"
+      onSubmit={handleSubmit(onFormSubmit)}
+      sx={{ mt: 1, width: "100%" }}
+    >
       {formError && (
         <Box sx={{ mb: 2 }}>
           <ErrorMessage
@@ -188,12 +147,11 @@ const RegistrationForm = ({ onSubmit, loading = false }) => {
       )}
 
       <TextField
+        {...register("name")}
         label="Full Name"
         type="text"
-        value={formData.name}
-        onChange={handleChange("name")}
         error={!!errors.name}
-        helperText={errors.name}
+        helperText={errors.name?.message}
         autoComplete="name"
         required
         fullWidth
@@ -202,12 +160,11 @@ const RegistrationForm = ({ onSubmit, loading = false }) => {
       />
 
       <TextField
+        {...register("email")}
         label="Email Address"
         type="email"
-        value={formData.email}
-        onChange={handleChange("email")}
         error={!!errors.email}
-        helperText={errors.email}
+        helperText={errors.email?.message}
         autoComplete="email"
         required
         fullWidth
@@ -216,12 +173,11 @@ const RegistrationForm = ({ onSubmit, loading = false }) => {
       />
 
       <TextField
+        {...register("password")}
         label="Password"
         type="password"
-        value={formData.password}
-        onChange={handleChange("password")}
         error={!!errors.password}
-        helperText={errors.password}
+        helperText={errors.password?.message}
         autoComplete="new-password"
         required
         fullWidth
@@ -230,12 +186,11 @@ const RegistrationForm = ({ onSubmit, loading = false }) => {
       />
 
       <TextField
+        {...register("confirmPassword")}
         label="Confirm Password"
         type="password"
-        value={formData.confirmPassword}
-        onChange={handleChange("confirmPassword")}
         error={!!errors.confirmPassword}
-        helperText={errors.confirmPassword}
+        helperText={errors.confirmPassword?.message}
         autoComplete="new-password"
         required
         fullWidth
@@ -254,12 +209,24 @@ const RegistrationForm = ({ onSubmit, loading = false }) => {
       <TextField
         select
         label="Email Service Provider"
-        value={formData.emailServiceProvider}
-        onChange={handleChange("emailServiceProvider")}
-        required
+        defaultValue="gmail"
         fullWidth
         variant="outlined"
         sx={{ mb: 2 }}
+        {...register("emailServiceProvider", {
+          onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+            const providerKey = e.target.value as keyof typeof EMAIL_PROVIDERS;
+            const provider = EMAIL_PROVIDERS[providerKey];
+            if (provider) {
+              setValue("imapHost", provider.imapHost);
+              setValue("imapPort", provider.imapPort);
+              setValue("imapSecure", provider.imapSecure);
+              setValue("smtpHost", provider.smtpHost);
+              setValue("smtpPort", provider.smtpPort);
+              setValue("smtpSecure", provider.smtpSecure);
+            }
+          },
+        })}
       >
         {Object.entries(EMAIL_PROVIDERS).map(([key, provider]) => (
           <MenuItem key={key} value={key}>
@@ -269,13 +236,12 @@ const RegistrationForm = ({ onSubmit, loading = false }) => {
       </TextField>
 
       <TextField
+        {...register("emailAddress")}
         label="Email Address"
         type="email"
-        value={formData.emailAddress}
-        onChange={handleChange("emailAddress")}
         error={!!errors.emailAddress}
         helperText={
-          errors.emailAddress ||
+          errors.emailAddress?.message ||
           "Your actual email address (e.g., yourname@gmail.com)"
         }
         required
@@ -285,13 +251,12 @@ const RegistrationForm = ({ onSubmit, loading = false }) => {
       />
 
       <TextField
+        {...register("emailPassword")}
         label="Email Password / App Password"
         type="password"
-        value={formData.emailPassword}
-        onChange={handleChange("emailPassword")}
         error={!!errors.emailPassword}
         helperText={
-          errors.emailPassword ||
+          errors.emailPassword?.message ||
           "For Gmail/Outlook, use an app-specific password"
         }
         required
@@ -300,28 +265,28 @@ const RegistrationForm = ({ onSubmit, loading = false }) => {
         sx={{ mb: 2 }}
       />
 
-      {formData.emailServiceProvider === "custom" && (
+      {selectedProvider === "custom" && (
         <>
           <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>
             IMAP Settings (Incoming Mail)
           </Typography>
           <TextField
+            {...register("imapHost")}
             label="IMAP Host"
             type="text"
-            value={formData.imapHost}
-            onChange={handleChange("imapHost")}
             error={!!errors.imapHost}
-            helperText={errors.imapHost}
+            helperText={errors.imapHost?.message}
             required
             fullWidth
             variant="outlined"
             sx={{ mb: 2 }}
           />
           <TextField
+            {...register("imapPort", { valueAsNumber: true })}
             label="IMAP Port"
             type="number"
-            value={formData.imapPort}
-            onChange={handleChange("imapPort")}
+            error={!!errors.imapPort}
+            helperText={errors.imapPort?.message}
             required
             fullWidth
             variant="outlined"
@@ -332,22 +297,22 @@ const RegistrationForm = ({ onSubmit, loading = false }) => {
             SMTP Settings (Outgoing Mail)
           </Typography>
           <TextField
+            {...register("smtpHost")}
             label="SMTP Host"
             type="text"
-            value={formData.smtpHost}
-            onChange={handleChange("smtpHost")}
             error={!!errors.smtpHost}
-            helperText={errors.smtpHost}
+            helperText={errors.smtpHost?.message}
             required
             fullWidth
             variant="outlined"
             sx={{ mb: 2 }}
           />
           <TextField
+            {...register("smtpPort", { valueAsNumber: true })}
             label="SMTP Port"
             type="number"
-            value={formData.smtpPort}
-            onChange={handleChange("smtpPort")}
+            error={!!errors.smtpPort}
+            helperText={errors.smtpPort?.message}
             required
             fullWidth
             variant="outlined"

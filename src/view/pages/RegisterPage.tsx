@@ -2,14 +2,16 @@ import { Box, Container, Link, Typography } from "@mui/material";
 import { useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useAccount } from "../../nonview/core/AccountContext";
-import RegistrationForm from "../moles/RegistrationForm";
+import RegistrationForm, {
+  type RegistrationFormData,
+} from "../moles/RegistrationForm";
 
 function RegisterPage() {
   const navigate = useNavigate();
   const { addAccount } = useAccount();
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (data) => {
+  const handleSubmit = async (data: RegistrationFormData) => {
     setLoading(true);
     try {
       await addAccount(data);

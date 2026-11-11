@@ -3,14 +3,14 @@ import { useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { APIError } from "../../nonview/api/client";
 import { useAccount } from "../../nonview/core/AccountContext";
-import LoginForm from "../moles/LoginForm";
+import LoginForm, { type LoginFormData } from "../moles/LoginForm";
 
 function LoginPage() {
   const navigate = useNavigate();
   const { accounts, reauthenticate } = useAccount();
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (data) => {
+  const handleSubmit = async (data: LoginFormData) => {
     setLoading(true);
     try {
       const entered = data.email.toLowerCase();
