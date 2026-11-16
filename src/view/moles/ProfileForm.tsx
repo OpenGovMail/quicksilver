@@ -196,7 +196,6 @@ function ProfileForm({ user, onSubmit }) {
     } catch (err: any) {
       setError(err.message || "Failed to update profile");
     }
-    setLoading(false);
   };
 
   return (
