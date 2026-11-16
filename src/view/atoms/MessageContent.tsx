@@ -152,7 +152,9 @@ const IsolatedHTML: React.FC<{ html: string }> = ({ html }) => {
   // resize() runs in listeners/timeouts that close over the initial render, so
   // read the latest height from a ref to avoid a stale-closure comparison.
   const heightRef = useRef(height);
-  heightRef.current = height;
+  useEffect(() => {
+    heightRef.current = height;
+  }, [height]);
 
   useEffect(() => {
     const iframe = ref.current;

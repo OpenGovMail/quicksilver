@@ -98,7 +98,7 @@ const MessageGroup = ({
         )}
         {messages.map((message, index) => (
           <MessageBubble
-            key={message.id}
+            key={message.id + index.toString()}
             message={message}
             isSent={isSent}
             isFirstInGroup={index === 0}

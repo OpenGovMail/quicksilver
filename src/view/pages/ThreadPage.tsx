@@ -139,9 +139,8 @@ function ThreadPage() {
       setToast("Message sent");
     } catch (e) {
       setSendError(e?.message || "Failed to send reply");
-    } finally {
-      setSending(false);
     }
+    setSending(false);
   };
 
   // Fetch the message body once per thread. `getMessages` is memoized in
