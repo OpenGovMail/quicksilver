@@ -12,7 +12,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { useColorScheme } from "@mui/material/styles";
-import React from "react";
+import React, { startTransition } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAccount } from "../../nonview/core/AccountContext";
 import { getInitials } from "../_constants/avatarUtils";
@@ -149,7 +149,7 @@ const Header = ({
           </Tooltip>
 
           <IconButton
-            onClick={() => navigate("/profile")}
+            onClick={() => startTransition(() => navigate("/profile"))}
             aria-label="profile"
             sx={{ ml: isMobile ? 0.5 : 1 }}
           >

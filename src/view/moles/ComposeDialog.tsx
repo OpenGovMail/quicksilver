@@ -44,11 +44,13 @@ const ComposeDialog = ({
       // Keep the panel unmounted when closed so each open starts fresh with the
       // latest reply context (recipients, subject, threading headers).
       keepMounted={false}
-      PaperProps={{
-        sx: {
-          height: fullScreen ? "100%" : "90vh",
-          display: "flex",
-          flexDirection: "column",
+      slotProps={{
+        paper: {
+          sx: {
+            height: fullScreen ? "100%" : "90vh",
+            display: "flex",
+            flexDirection: "column",
+          },
         },
       }}
     >
