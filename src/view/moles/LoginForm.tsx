@@ -29,7 +29,7 @@ const LoginForm = ({ onSubmit, loading = false }) => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     control,
   } = useForm({
     resolver: zodResolver(loginSchema),
@@ -43,6 +43,8 @@ const LoginForm = ({ onSubmit, loading = false }) => {
       setFormError(error.message || "Login failed. Please try again.");
     }
   };
+
+  const isLoading = loading || isSubmitting;
 
   return (
     <Box
@@ -106,8 +108,8 @@ const LoginForm = ({ onSubmit, loading = false }) => {
         fullWidth
         variant="contained"
         color="primary"
-        disabled={loading}
-        startIcon={loading ? <CircularProgress size={20} /> : null}
+        disabled={isLoading}
+        startIcon={isLoading ? <CircularProgress size={20} /> : null}
         sx={{ mt: 3, mb: 2 }}
       >
         Sign In

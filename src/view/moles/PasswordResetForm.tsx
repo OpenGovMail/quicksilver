@@ -1,55 +1,57 @@
 import { Box, Button, CircularProgress, TextField } from "@mui/material";
 import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import ErrorMessage from "../atoms/ErrorMessage";
 
 const PasswordResetForm = ({ onSubmit, loading = false }) => {
-  const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
-  const [formError, setFormError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const validateEmail = () => {
-    if (!email) {
-      setError("Email is required");
-      return false;
-    }
-    if (!/\S+@\S+\.\S+/.test(email)) {
-      setError("Email is invalid");
-      return false;
-    }
-    setError("");
-    return true;
-  };
+  const {
+    control,
+    handleSubmit,
+    setError,
+    clearErrors,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues: {
+      email: "",
+    },
+  });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setFormError("");
+  const isLoading = loading || isSubmitting;
+  const formError = errors.root?.serverError?.message;
+
+  const handleFormSubmit = async ({ email }) => {
     setSuccessMessage("");
-
-    if (!validateEmail()) {
-      return;
-    }
 
     try {
       await onSubmit({ email });
+      reset();
       setSuccessMessage(
         "Password reset instructions have been sent to your email address.",
       );
-      setEmail("");
     } catch (error) {
-      setFormError(
-        error.message || "Failed to send reset email. Please try again.",
-      );
+      setError("root.serverError", {
+        type: "server",
+        message:
+          error?.message || "Failed to send reset email. Please try again.",
+      });
     }
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: "100%" }}>
+    <Box
+      component="form"
+      noValidate
+      onSubmit={handleSubmit(handleFormSubmit, () => setSuccessMessage(""))}
+      sx={{ mt: 1, width: "100%" }}
+    >
       {formError && (
         <Box sx={{ mb: 2 }}>
           <ErrorMessage
             message={formError}
-            onDismiss={() => setFormError("")}
+            onDismiss={() => clearErrors("root.serverError")}
           />
         </Box>
       )}
@@ -64,34 +66,44 @@ const PasswordResetForm = ({ onSubmit, loading = false }) => {
         </Box>
       )}
 
-      <TextField
-        label="Email Address"
-        type="email"
-        value={email}
-        onChange={(e) => {
-          setEmail(e.target.value);
-          if (error) setError("");
+      <Controller
+        name="email"
+        control={control}
+        rules={{
+          required: "Email is required",
+          pattern: {
+            value: /\S+@\S+\.\S+/,
+            message: "Email is invalid",
+          },
         }}
-        error={!!error}
-        helperText={error}
-        autoComplete="email"
-        required
-        fullWidth
-        variant="outlined"
-        sx={{ mb: 2 }}
+        render={({ field: { ref, ...fieldProps }, fieldState: { error } }) => (
+          <TextField
+            {...fieldProps}
+            inputRef={ref}
+            label="Email Address"
+            type="email"
+            error={!!error}
+            helperText={error?.message}
+            autoComplete="email"
+            required
+            fullWidth
+            variant="outlined"
+            sx={{ mb: 2 }}
+          />
+        )}
       />
 
       <Button
         type="submit"
         fullWidth
-        disabled={loading}
+        disabled={isLoading}
         variant="contained"
         color="primary"
-        startIcon={loading ? <CircularProgress size={20} /> : null}
+        startIcon={isLoading ? <CircularProgress size={20} /> : null}
         sx={{ mt: 3, mb: 2 }}
       >
         Send Reset Link
-      </Button>
+      </Button>x
     </Box>
   );
 };
