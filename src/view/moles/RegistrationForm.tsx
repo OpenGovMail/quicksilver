@@ -98,7 +98,7 @@ const RegistrationForm = ({ onSubmit, loading = false }) => {
     handleSubmit,
     setValue,
     control,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<RegistrationFormData>({
     resolver: zodResolver(registrationSchema),
     defaultValues: {
@@ -130,6 +130,8 @@ const RegistrationForm = ({ onSubmit, loading = false }) => {
       setFormError(error.message || "Registration failed. Please try again.");
     }
   };
+
+  const isLoading = loading || isSubmitting;
 
   return (
     <Box
@@ -324,10 +326,10 @@ const RegistrationForm = ({ onSubmit, loading = false }) => {
       <Button
         type="submit"
         fullWidth
-        disabled={loading}
+        disabled={isLoading}
         variant="contained"
         color="primary"
-        startIcon={loading ? <CircularProgress size={20} /> : null}
+        startIcon={isLoading ? <CircularProgress size={20} /> : null}
         sx={{ mt: 3, mb: 2 }}
       >
         Register

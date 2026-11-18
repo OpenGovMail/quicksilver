@@ -164,7 +164,6 @@ const AddAccountForm = ({
         (error as Error).message || "Registration failed. Please try again.",
       );
     }
-    setSubmitting(false);
   };
 
   const isBusy = loading || isSubmitting;
